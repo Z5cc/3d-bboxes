@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 from constants import DATASET_PATH, H, W
 
 
-class dl_challenge(Dataset):
+class Dataloader(Dataset):
     def __init__(self):
         self.names = {}
         self.idx_cumul = []
