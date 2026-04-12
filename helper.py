@@ -1,5 +1,6 @@
 import numpy as np
 import os
+from constants import DATASET_PATH
 
 
 def get_sizes_from_one_mask(mask):
@@ -27,27 +28,25 @@ def get_sizes_from_one_maskfile(maskfile):
 
 def get_sizes_from_all_maskfiles():
     sizes = []
-    base_path = './dl_challenge'
-    for entry in os.scandir(base_path):
-        if entry.is_dir():
-            mask_path = os.path.join(entry,'mask.npy')
-            maskfile = np.load(mask_path)
-            sizes.extend(get_sizes_from_one_maskfile(maskfile))        
+    for entry in os.scandir(DATASET_PATH):
+        mask_path = os.path.join(entry,'mask.npy')
+        maskfile = np.load(mask_path)
+        sizes.extend(get_sizes_from_one_maskfile(maskfile))
     return sizes
 
 
-sizes = get_sizes_from_all_maskfiles()
-print(max(sizes))
+# sizes = get_sizes_from_all_maskfiles()
+# print(max(sizes))
 
 
 
 
-# pc = np.load('dl_challenge_example2/pc.npy')
-# pc = pc.transpose(1,2,0)
-# print(pc.shape)
+pc = np.load('dl_challenge_example2/pc.npy')
+pc = pc.transpose(1,2,0)
+print(pc.shape)
 
-# mask = np.load('dl_challenge_example2/mask.npy')
-# print(mask.shape)
+masks = np.load('dl_challenge_example2/mask.npy')
+print(masks.shape)
 
-# bbox3d = np.load('dl_challenge_example2/bbox3d.npy')
-# print(bbox3d.shape)
+bbox3d = np.load('dl_challenge_example2/bbox3d.npy')
+print(bbox3d.shape)
