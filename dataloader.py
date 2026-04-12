@@ -47,8 +47,8 @@ class dl_challenge(Dataset):
         mask_path = os.path.join(bulk_path, 'mask.npy')
         pc_path = os.path.join(bulk_path, 'pc.npy')
 
-        # y
-        y = np.load(bbox3d_path)[local_idx] # [N,8,3] -> [8,3]
+        # bb
+        bb = np.load(bbox3d_path)[local_idx] # [N,8,3] -> [8,3]
 
         # x
         mask = np.load(mask_path)[local_idx] # [N,H,W] -> [H,W]
@@ -68,4 +68,4 @@ class dl_challenge(Dataset):
         x = np.concatenate([mask[None,:,:],pc], axis=0)
         # then cut out H=256 and W=256 area out based on mask center
         x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
-        return x, y
+        return x, bb
