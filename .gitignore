@@ -1,5 +1,6 @@
 .venv
 .vscode
-dl_challenge
-dl_challenge_example
-dl_challenge_example2
+__pycache__
+.pytest_cache
+dl_challenge_train
+dl_challenge_test

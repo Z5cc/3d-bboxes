@@ -2,13 +2,14 @@ import torch
 import torch.optim as optim
 import numpy as np
 from matplotlib import pyplot as plt
-from network import Network
-from dataloader import Dataloader
+from classes.network import Network
+from classes.dataset_dl_challenge import Dataset_dl_challenge
+from constants import TRAIN_PATH
 
 
 model = Network()
 optimizer = optim.Adam(model.parameters())
-dataloader = Dataloader()
+train_data = Dataset_dl_challenge(TRAIN_PATH)
 
 def loss_fn(bb, bb_truth): # [8,3]
     perms = [
@@ -69,16 +70,17 @@ def create_bb(c):
 
 
 def train():
-    for x, bb_truth in dataloader:
+    for x, bb_truth in train_data:
         optimizer.zero_grad()
 
-        y = model(x) # x:[4,H,W]  
+        y = model(x) # x:[4,H,W]
         bb = create_bb(y)
 
         loss = loss_fn(bb, bb_truth)
         loss.backward()
         optimizer.step()
         print(loss)
+    torch.save(model.state_dict(), "model.pth")
 
 
 train()

@@ -2,4 +2,5 @@
 H=256
 W=256
 # dataset path
-DATASET_PATH = './dl_challenge'
+TRAIN_PATH = './dl_challenge_train'
+TEST_PATH = './dl_challenge_test'

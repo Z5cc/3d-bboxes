@@ -4,16 +4,17 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
-from constants import DATASET_PATH, H, W
+from constants import H, W
 
 
-class Dataloader(Dataset):
-    def __init__(self):
+class Dataset_dl_challenge(Dataset):
+    def __init__(self, path):
+        self.path = path
         self.names = {}
         self.idx_cumul = []
         total = 0
         # sorting guarantees that 'names' and 'cumulative' stay consistent
-        entries = sorted(os.scandir(DATASET_PATH), key=lambda e: e.name)
+        entries = sorted(os.scandir(self.path), key=lambda e: e.name)
 
         for i, entry in enumerate(entries):
             # create hashmap. example:  [bulk_idx: 22] -> ['911224f8-9915-11ee-9103-bbb8eae05561']
@@ -21,7 +22,7 @@ class Dataloader(Dataset):
             self.names[i] = name
 
             # get amount of bounding boxes in 'bbox3d.npy' file for cumulative indices
-            bbox3d_path = os.path.join(DATASET_PATH,name,'bbox3d.npy')
+            bbox3d_path = os.path.join(self.path,name,'bbox3d.npy')
             bbox3d = np.load(bbox3d_path)
             size = len(bbox3d)
             total+=size
@@ -43,7 +44,7 @@ class Dataloader(Dataset):
 
         # get paths and access '.npy' files
         name = self.names[bulk_idx]
-        bulk_path = os.path.join(DATASET_PATH, name)
+        bulk_path = os.path.join(self.path, name)
         bbox3d_path = os.path.join(bulk_path, 'bbox3d.npy')
         mask_path = os.path.join(bulk_path, 'mask.npy')
         pc_path = os.path.join(bulk_path, 'pc.npy')
