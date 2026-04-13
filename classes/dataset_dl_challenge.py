@@ -50,11 +50,11 @@ class Dataset_dl_challenge(Dataset):
         pc_path = os.path.join(bulk_path, 'pc.npy')
 
         # bb
-        bb = np.load(bbox3d_path)[local_idx] # [N,8,3] -> [8,3]
+        bb = np.load(bbox3d_path)[local_idx] # [E,8,3] -> [8,3]
         bb = torch.from_numpy(bb).float()
 
         # x
-        mask = np.load(mask_path)[local_idx] # [N,H,W] -> [H,W]
+        mask = np.load(mask_path)[local_idx] # [E,H,W] -> [H,W]
         pc = np.load(pc_path) # [3xHxW]
         # find center of mask
         coords = np.argwhere(mask)
