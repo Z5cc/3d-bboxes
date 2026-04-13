@@ -35,6 +35,6 @@ class Network(nn.Module):
         x = self.pool5(x)
         x = F.relu(self.conv6(x))
         x = self.pool6(x)
-        x = torch.flatten(x)
+        x = torch.flatten(x, start_dim=1)
         x = self.lin1(x)
         return x

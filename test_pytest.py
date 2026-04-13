@@ -1,4 +1,4 @@
-from classes.dataset_dl_challenge import Dataset_dl_challenge
+from utils.dataset_dl_challenge import Dataset_dl_challenge
 import pytest
 from constants import TEST_PATH
 
