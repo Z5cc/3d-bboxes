@@ -2,6 +2,7 @@ import os
 import bisect
 import numpy as np
 import pandas as pd
+import torch
 from torch.utils.data import Dataset
 from constants import DATASET_PATH, H, W
 
@@ -49,6 +50,7 @@ class Dataloader(Dataset):
 
         # bb
         bb = np.load(bbox3d_path)[local_idx] # [N,8,3] -> [8,3]
+        bb = torch.from_numpy(bb).float()
 
         # x
         mask = np.load(mask_path)[local_idx] # [N,H,W] -> [H,W]
@@ -68,4 +70,5 @@ class Dataloader(Dataset):
         x = np.concatenate([mask[None,:,:],pc], axis=0)
         # then cut out H=256 and W=256 area out based on mask center
         x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
+        x = torch.from_numpy(x).float()
         return x, bb

@@ -70,12 +70,15 @@ def create_bb(c):
 
 def train():
     for x, bb_truth in dataloader:
+        optimizer.zero_grad()
+
         y = model(x) # x:[4,H,W]  
         bb = create_bb(y)
 
         loss = loss_fn(bb, bb_truth)
-        loss.backwards()
+        loss.backward()
         optimizer.step()
+        print(loss)
 
 
 train()
