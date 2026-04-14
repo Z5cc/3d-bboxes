@@ -5,10 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from utils.network import Network
 from utils.dataset_dl_challenge import Dataset_dl_challenge
-from utils.helper import create_bb
-from constants import TRAIN_PATH , PERMS, N, MODEL_PATH
-
-
+from utils.geometry import create_bb
+from constants import TRAIN_PATH , PERMS, N, EPOCHS, MODEL_PATH
 
 
 def loss_bb(bb, bb_truth):
@@ -18,7 +16,7 @@ def loss_bb(bb, bb_truth):
     bb_truth = bb_truth[:,None,:,:] # [N,1,8,3]
     bb_delta = bb_truth - bb_perm # [N,24,8,3]
     
-    # from that delta vectors, calculate L2 distance, select smallest sum from all permutations
+    # from that delta vectors, calculate L2 distances, select smallest L2 distances sum from all permutations
     distances = torch.linalg.norm(bb_delta, dim=3) # [N,24,8]
     distances = distances.sum(dim=2) # [N,24]
     distances = distances.min(dim=1).values # [N]
@@ -32,19 +30,19 @@ def train():
     train_data = Dataset_dl_challenge(TRAIN_PATH)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True)
 
-    for x, bb_truth in train_loader:
-        optimizer.zero_grad()
+    for epoch in range(EPOCHS):
+        print(f'epoch :{epoch}')
+        for x, bb_truth in train_loader:
+            optimizer.zero_grad()
 
-        y = model(x) # [N,3]
-        bb = create_bb(y) # [N,8,3]
-        loss = loss_bb(bb, bb_truth) # [N]
-        loss = loss.mean() # scalar
-        loss.backward()
-        optimizer.step()
-        print(loss)
+            y = model(x) # [N,3]
+            bb = create_bb(y) # [N,8,3]
+            loss = loss_bb(bb, bb_truth) # [N]
+            loss = loss.mean() # scalar
+            loss.backward()
+            optimizer.step()
+            print(loss)
     torch.save(model.state_dict(), MODEL_PATH)
-
-
 
 
 train()

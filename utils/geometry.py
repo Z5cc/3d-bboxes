@@ -6,4 +6,4 @@ def create_bb(c):
     base = base[None,:,:] # [1,8,3]
     c = c[:,None,:] # [N,3] -> [N,1,3]
     bb = base+c # broadcasting to [N,8,3]
-    return bb
+    return bb # [N,8,3]

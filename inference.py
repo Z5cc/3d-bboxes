@@ -1,58 +1,46 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from utils.helper import create_bb
+from utils.geometry import create_bb
 from utils.network import Network
 from utils.dataset_dl_challenge import Dataset_dl_challenge
+from utils.graphic import Graphic
 from constants import MODEL_PATH, TEST_PATH
 
 
-def plot_box(ax,b,idx):
-    verts = [[b[0],b[1],b[2],b[3]],[b[4],b[5],b[6],b[7]],[b[0],b[3],b[7],b[4]],[b[3],b[2],b[6],b[7]],[b[2],b[1],b[5],b[6]],[b[0],b[1],b[5],b[4]]]
-    ax.add_collection3d(Poly3DCollection(verts,facecolors='blue', linewidths=1, edgecolors='black', alpha=.1))
-    for i, (x, y, z) in enumerate(b):
-        ax.text(x, y, z, str(i), color='red')
-    # label of box
-    center = np.mean(b, axis=0)
-    ax.text(
-        center[0], center[1], center[2],
-        str(idx),
-        color='red',
-        fontsize=20,
-        ha='center',
-        va='center'
-    )
+def inference():
+    model = Network()
+    model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
+    test_data = Dataset_dl_challenge(TEST_PATH)
+    test_loader = DataLoader(test_data)
+    bb_all = []
 
-def plot_boxes(bbox3d):
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    for idx,b in enumerate(bbox3d):
-        plot_box(ax,b,idx)
-    plt.show()
+    # inference
+    with torch.no_grad():
+        for x, _ in test_loader:
+            y = model(x) # [N]
+            bb = create_bb(y) # [N,8,3] with N=1
+            bb = bb.numpy() # torch -> numpy
+            bb_all.append(bb)
 
+    # group bb with idx_cumul
+    idx_cumul = test_data.get_idx_cumul()
+    idx_cumul_zero = [0]+idx_cumul
+    bb_per_folder = [
+        bb_all[start:end]
+        for start, end in zip(idx_cumul_zero[:-1], idx_cumul_zero[1:])
+    ]
+    bb_per_folder = [np.concatenate(one_folder, axis=0) for one_folder in bb_per_folder]
 
-
-
-
-
-
-
-model = Network()
-model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
-
-test_data = Dataset_dl_challenge(TEST_PATH)
-test_loader = DataLoader(test_data)
-
-for x,_ in test_loader:
-    y = model(x)
-    bb = create_bb(y)
+    # visualization
+    for name, bb_inf in zip(test_data.get_names(), bb_per_folder):
+        bbox3d_path = os.path.join(TEST_PATH,name,'bbox3d.npy')
+        bb_truth = np.load(bbox3d_path) # [E,8,3]
+        graphic = Graphic()
+        graphic.plot_all(bb_inf, bb_truth)
 
 
-# read bbox3d
-# bbox3d = np.load('dl_challenge/911224f8-9915-11ee-9103-bbb8eae05561/bbox3d.npy')
-# plot_boxes(bbox3d)
+inference()

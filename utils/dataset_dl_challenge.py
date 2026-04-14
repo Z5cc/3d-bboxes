@@ -10,7 +10,7 @@ from constants import H, W
 class Dataset_dl_challenge(Dataset):
     def __init__(self, path):
         self.path = path
-        self.names = {}
+        self.names = []
         self.idx_cumul = []
         total = 0
         # sorting guarantees that 'names' and 'cumulative' stay consistent
@@ -19,7 +19,7 @@ class Dataset_dl_challenge(Dataset):
         for i, entry in enumerate(entries):
             # create hashmap. example:  [bulk_idx: 22] -> ['911224f8-9915-11ee-9103-bbb8eae05561']
             name = entry.name
-            self.names[i] = name
+            self.names.append(name)
 
             # get amount of bounding boxes in 'bbox3d.npy' file for cumulative indices
             bbox3d_path = os.path.join(self.path,name,'bbox3d.npy')
@@ -73,3 +73,12 @@ class Dataset_dl_challenge(Dataset):
         x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
         x = torch.from_numpy(x).float()
         return x, bb
+    
+    
+    def get_names(self):
+        return self.names
+
+
+    def get_idx_cumul(self):
+        return self.idx_cumul
+    
