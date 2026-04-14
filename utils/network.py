@@ -25,7 +25,7 @@ class Network(nn.Module):
         self.conv10 = nn.Conv2d(32,32,(3,3),padding='same')
         self.lin1 = nn.Linear(8*8*32, 512)
         self.lin2 = nn.Linear(512,128)
-        self.lin3 = nn.Linear(128,6)
+        self.lin3 = nn.Linear(128,9)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -41,7 +41,7 @@ class Network(nn.Module):
         x = F.relu(self.conv8(x))
         x = self.pool4(x)
         x = F.relu(self.conv9(x))
-        x = F.relu(self.conv9(x))
+        x = F.relu(self.conv10(x))
         x = self.pool5(x)
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.lin1(x))

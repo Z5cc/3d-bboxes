@@ -1,10 +1,41 @@
 import torch
+import torch.nn.functional as F
+from constants import N
 
-def create_bb(y): # [N,6]
-    # create base of bb, that is a cube
-    base = torch.tensor([[-0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[0.5,-0.5,-0.5],
+def create_bb(y): # [N,9]
+    # 0. BASE OF BOUNDING BOX
+    bb = torch.tensor([[-0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[0.5,-0.5,-0.5],
                          [-0.5,-0.5,0.5],[-0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,-0.5,0.5]],
                          dtype = torch.float)
-    # bb = base * width + center
-    bb = base[None,:,:] * y[:,None,3:6] + y[:,None,0:3] # [N,8,3]
-    return bb
+    bb = bb[None,:,:] # [N,8,3]
+
+    # 1. SCALE
+    size = y[:,None, 3:6] # [N,1,3]
+    size = F.softplus(size)
+    bb = bb * size  # [N,8,3]
+
+    # 2. ROTATE
+    angles = (torch.tanh(y[:,6:9])) * (torch.pi / 4) # [N,3]
+    cx, cy, cz = torch.cos(angles[:,0]), torch.cos(angles[:,1]), torch.cos(angles[:,2]) # [N]
+    sx, sy, sz = torch.sin(angles[:,0]), torch.sin(angles[:,1]), torch.sin(angles[:,2]) # [N]
+    R = torch.zeros((y.shape[0], 3, 3)) # [N,3,3]
+
+    R[:,0,0] = cy * cz
+    R[:,0,1] = cz * sx * sy - cx * sz
+    R[:,0,2] = cx * cz * sy + sx * sz
+
+    R[:,1,0] = cy * sz
+    R[:,1,1] = cx * cz + sx * sy * sz
+    R[:,1,2] = -cz * sx + cx * sy * sz
+
+    R[:,2,0] = -sy
+    R[:,2,1] = cy * sx
+    R[:,2,2] = cx * cy
+
+    bb = torch.matmul(bb, R.transpose(1,2)) # [N,8,3]=[N,8,3]*[N,3,3]
+
+    # 3. SHIFT
+    center = y[:,None,0:3] # [N,1,3]
+    bb = bb + center
+
+    return bb # [N,8,3]

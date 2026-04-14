@@ -42,7 +42,7 @@ def train():
             loss.backward()
             optimizer.step()
             print(loss)
-    torch.save(model.state_dict(), MODEL_PATH)
+        torch.save(model.state_dict(), MODEL_PATH)
 
 
 train()
