@@ -2,7 +2,7 @@
 H=256
 W=256
 # batch size
-N = 32
+N = 8
 # epochs
 EPOCHS = 10
 
