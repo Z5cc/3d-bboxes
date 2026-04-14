@@ -31,7 +31,7 @@ def train():
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True)
 
     for epoch in range(EPOCHS):
-        print(f'epoch :{epoch}')
+        print(f'EPOCH: {epoch}')
         for x, bb_truth in train_loader:
             optimizer.zero_grad()
 
