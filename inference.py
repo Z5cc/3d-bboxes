@@ -8,10 +8,11 @@ from utils.geometry import create_bb
 from utils.network import Network
 from utils.dataset_dl_challenge import Dataset_dl_challenge
 from utils.graphic import Graphic
+from utils.geometry import loss_bb
 from constants import MODEL_PATH, TEST_PATH
 
 
-def inference():
+def inference(vis=True):
     model = Network()
     model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
     test_data = Dataset_dl_challenge(TEST_PATH)
@@ -20,9 +21,12 @@ def inference():
 
     # inference
     with torch.no_grad():
-        for x, _ in test_loader:
+        for x, bb_truth in test_loader:
             y = model(x) # [N]
             bb = create_bb(y) # [N,8,3] with N=1
+            loss = loss_bb(bb, bb_truth)
+            loss = loss.mean()
+            print(f'inference loss: {loss.item()}')
             bb = bb.numpy() # torch -> numpy
             bb_all.append(bb)
 
@@ -35,12 +39,14 @@ def inference():
     ]
     bb_per_folder = [np.concatenate(one_folder, axis=0) for one_folder in bb_per_folder]
 
-    # visualization
-    for name, bb_inf in zip(test_data.get_names(), bb_per_folder):
-        bbox3d_path = os.path.join(TEST_PATH,name,'bbox3d.npy')
-        bb_truth = np.load(bbox3d_path) # [E,8,3]
-        graphic = Graphic()
-        graphic.plot_all(bb_inf, bb_truth)
+    if vis==True:
+        # visualization
+        for name, bb_inf in zip(test_data.get_names(), bb_per_folder):
+            bbox3d_path = os.path.join(TEST_PATH,name,'bbox3d.npy')
+            bb_truth = np.load(bbox3d_path) # [E,8,3]
+            graphic = Graphic()
+            graphic.plot_all(bb_inf, bb_truth)
 
 
-inference()
+if __name__ == '__main__':
+    inference()

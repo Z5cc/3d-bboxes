@@ -1,6 +1,21 @@
 import torch
 import torch.nn.functional as F
-from constants import N
+from constants import N, PERMS
+
+
+def loss_bb(bb, bb_truth):
+    # calculate delta between ground truth and all permutations of inference result
+    perms = torch.tensor(PERMS, dtype=torch.long)
+    bb_perm = bb[:,perms,:] # [N,24,8,3]
+    bb_truth = bb_truth[:,None,:,:] # [N,1,8,3]
+    bb_delta = bb_truth - bb_perm # [N,24,8,3]
+    
+    # from that delta vectors, calculate L2 distances, select smallest L2 distances sum from all permutations
+    distances = torch.linalg.norm(bb_delta, dim=3) # [N,24,8]
+    distances = distances.sum(dim=2) # [N,24]
+    distances = distances.min(dim=1).values # [N]
+    loss = distances ** 2
+    return loss # [N]
 
 def create_bb(y): # [N,9]
     # 0. BASE OF BOUNDING BOX

@@ -4,7 +4,7 @@ W=256
 # batch size
 N = 8
 # epochs
-EPOCHS = 10
+EPOCHS = 100
 
 # dataset path
 TRAIN_PATH = './dl_challenge_train'
