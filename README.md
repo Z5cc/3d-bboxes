@@ -1,4 +1,4 @@
-# 3d-bboxes
+# 3D Bounding Boxes
 
 2026-04-15 by David Nicklaser  
 
@@ -85,9 +85,9 @@ code:
 loss = loss_bb(bb, bb_truth)
 
 
-$\mathcal{L} = \left( \min_{\sigma \in \mathcal{P}} \sum_{i=1}^{8} \| \mathbf{b}_{\sigma(i)} - \mathbf{b}^{\text{truth}}_i \| \right)^2$
+$\mathcal{L} = \left( \min_{\sigma \in \mathcal{P}} \sum_{i=0}^{7} \| \mathbf{b}_{\sigma(i)} - \mathbf{b}^{\text{truth}}_i \| \right)^2$
 
-this is the loss for one bounding box. over one batch, the loss is averaged. b is a corner of bounding box bb.
+this is the loss for one bounding box. over one batch, the loss is averaged. b is a corner of bounding box bb. P are all 24 rotation permutations of a cube. 6 different faces which can point upwards. and for each face pointing up you have 4 rotations.
 calcultaing loss via center, size and angles directly would also be possible, but you would need to toake care of balance factors.
 calculating loss via cutting volume is complicated.
 In this loss however only distance vectors need to be calculated, that is for all rotation permutation of a cube, that are 24 permutation, the destiance vectors between the 8 ground trouth corner and 8 prediction corner are summed up. the smallest of these 24 sums is squared, which is then the loss.
