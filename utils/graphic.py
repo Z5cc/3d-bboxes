@@ -4,6 +4,7 @@ import numpy as np
 
 
 class Graphic:
+    
     def __init__(self):
         self.fig = plt.figure(figsize=(16,10))
         self.ax = self.fig.add_subplot(projection='3d')

@@ -12,23 +12,28 @@ from utils.geometry import loss_bb
 from constants import MODEL_PATH, TEST_PATH
 
 
-def inference(vis=True):
+def inference(vis=True, model_path=MODEL_PATH):
     model = Network()
-    model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
+    model.load_state_dict(torch.load(model_path, weights_only=True))
     test_data = Dataset_dl_challenge(TEST_PATH)
     test_loader = DataLoader(test_data)
     bb_all = []
 
     # inference
     with torch.no_grad():
+        total_loss=0
+        i=0
         for x, bb_truth in test_loader:
             y = model(x) # [N]
             bb = create_bb(y) # [N,8,3] with N=1
             loss = loss_bb(bb, bb_truth)
             loss = loss.mean()
+            total_loss+=loss.item()
+            i+=1
             print(f'inference loss: {loss.item()}')
             bb = bb.numpy() # torch -> numpy
             bb_all.append(bb)
+        avg_loss_test = total_loss/i
 
     # group bb with idx_cumul
     idx_cumul = test_data.get_idx_cumul()
@@ -47,6 +52,8 @@ def inference(vis=True):
             graphic = Graphic()
             graphic.plot_all(bb_inf, bb_truth)
 
+    return avg_loss_test
+
 
 if __name__ == '__main__':
-    inference()
+    inference(model_path='model.pth')
