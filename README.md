@@ -48,15 +48,51 @@ To adjust parameters, modify the *constants.py* file.
 
 ## Methodology
 
-**Architecture**
+**Data Loader** [`utils/dataset_dl_challenge.py`]
 
-DQN is used for the algorithm because of its simplicity. The neural network for the policy and the target network is mainly built from convolutional layers, based on the following idea. Kernels with a high–low–high pattern can detect far–close–far structures in the image, which correspond to good grasp locations. The policy network, which takes a state $s \in \mathcal{S}$ as input and outputs an action $a \in \mathcal{A}$, is designed as follows:  
+When inspecting the data, I found out that the order of bounding boxes in a file and the order of masks in the other file are the same. then i decided to run one inference per mask or per bounding box. 
+The advantage of this approach is the following: having only to inference one object is easier for the model. also the the archtiecture is simpler because no variable size has to be infereenced anymore.
+The disadvantage of this appraoch is the following: the total inference operations necessary to predicat all might be higher. it might take also longer to run the small model several times than inferencing all objects at once with a big model.
+i cut out a 256x256 field out of the point cloud. the center of this field is the center of the mask. if i am close to the border of the image, the center is shifted respectively to still have 256x256. as input to the neural network is 4x256x256. 1 channel for the mask 0.0 for false 1.0 for true.  3 channels for pc: x,y,z no preprocessing. rgb values have not been used. though might be worse an investigation, because of the shadows which can not be retrieved from the point cloud.
 
-4x256x256 -> **conv(3)** -> 8x16x16 -> **pool(2)** -> 8x8x8 -> **conv(3)** -> 16x8x8 -> **conv(3)** -> 16x8x8 -> **Flatten** -> 1024 -> **FC** -> 13
+**Architecture** [`utils/network.py`]
 
-**Loss Function**
+4@256x256  -> **conv(3x3)** -> 8@256x256  -> **conv(3x3)** -> 16@256x256 -> **avgPool(2x2)** -> <br>
+16@128x128 -> **conv(3x3)** -> 32@128x128 -> **conv(3x3)** -> 32@128x128 -> **avgPool(2x2)** -> <br>
+32@64x64   -> **conv(3x3)** -> 32@64x64   -> **conv(3x3)** -> 32@64x64   -> **avgPool(2x2)** -> <br>
+32@32x32   -> **conv(3x3)** -> 32@32x32   -> **conv(3x3)** -> 32@32x32   -> **avgPool(2x2)** -> <br>
+32@16x16   -> **conv(3x3)** -> 32@16x16   -> **conv(3x3)** -> 32@16x16   -> **avgPool(2x2)** -> <br>
+32@8x8     -> **flatten** -> 2048       -> **FC**      -> 512        -> **FC**         -> 9 (y)
 
-**Training**
+Strides of convolutions are all 1, strides of pooling layers are all 2. Average Pooling and not Max Pooling was selected, because averaging is bettern than maxing for a regression task like finding a middle point. Also diverging any other way from this homogenous architecture structure did not bring any improvements. such diverging has been done via for example. increasing convolution in begining from 3x3 to 5x5. or replacing a pooling with a stride 2 of convolution. amount of linear layers have been increased until loss started to go down.
+
+
+**Converting Neural Network Output to Bounding Boxes** [`utils/geometry.py`]
+
+code:
+bb = create_bb(y)
+
+$bb = rot\_fn(base*size) + center$
+
+rot_fn, size and center are all derived from y:<br>
+$center = y[0:3]$<br>
+$size = softplus(y[3:6])$<br>
+$angles = tanh(y[6:9])*(π/4)$
+
+**Loss Function** [`utils/geometry.py`]
+
+code:
+loss = loss_bb(bb, bb_truth)
+
+
+$\mathcal{L} = \left( \min_{\sigma \in \mathcal{P}} \sum_{i=1}^{8} \| \mathbf{b}_{\sigma(i)} - \mathbf{b}^{\text{truth}}_i \| \right)^2$
+
+this is the loss for one bounding box. over one batch, the loss is averaged.
+first I tought about a loss function 
+
+reason, I chose this loss function is the following: 
+
+....then show also graph of loss
 
 
 ## TODO
@@ -67,3 +103,4 @@ DQN is used for the algorithm because of its simplicity. The neural network for 
 ## Credits
 
 I did this project without the help of others. Furthermore, I conciously did not do any research on how 3D bounding boxes are solved nowadays to have a higher learning effect.
+The loss function came from my own thoughts and is not a suggestion from an AI. Neither did I read it up somewhere.

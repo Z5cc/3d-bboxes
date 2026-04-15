@@ -17,6 +17,7 @@ def loss_bb(bb, bb_truth):
     loss = distances ** 2
     return loss # [N]
 
+
 def create_bb(y): # [N,9]
     # 0. BASE OF BOUNDING BOX
     bb = torch.tensor([[-0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[0.5,-0.5,-0.5],
@@ -30,7 +31,7 @@ def create_bb(y): # [N,9]
     bb = bb * size  # [N,8,3]
 
     # 2. ROTATE
-    angles = (torch.tanh(y[:,6:9])) * (torch.pi / 4) # [N,3]
+    angles = (torch.tanh(y[:,6:9])) * (torch.pi/4) # [N,3]
     cx, cy, cz = torch.cos(angles[:,0]), torch.cos(angles[:,1]), torch.cos(angles[:,2]) # [N]
     sx, sy, sz = torch.sin(angles[:,0]), torch.sin(angles[:,1]), torch.sin(angles[:,2]) # [N]
     R = torch.zeros((y.shape[0], 3, 3)) # [N,3,3]
