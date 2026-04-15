@@ -27,7 +27,7 @@ To begin training, run *train.py*. Ensure that the *./dl_challenge_train* direct
 python3 train.py
 ```
 
-Run the *inference.py* file to perform inference and visualization. Ensure that the *./dl_challenge_train* directory contains data samples. Four sample files are provided, and they were not used during model training.
+Run the *inference.py* file to perform inference and visualization. Ensure that the *./dl_challenge_test* directory contains data samples. Four sample files are provided, and they were not used during model training.
 ```bash
 python3 inference.py
 ```
