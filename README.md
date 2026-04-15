@@ -24,7 +24,6 @@ pip install -r requirements.txt
 
 Run the *train.py* file for training. Make sure to have data samples in the *./dl_challenge_train* directory. I did not upload the samples for this directory.
 Running the *train.py* script should print logs of the following form:
-I saved the logs from the current *model.pth* under *./demo/train_logs*.
 ```bash
 python3 train.py
 ```
@@ -32,7 +31,6 @@ python3 train.py
 
 Run the *inference.py* file for inference and visualization.  Make sure to have data samples in the *./dl_challenge_train* directory. I uploaded four samples for this directory. These samples have not been used during the training of the model.
 Running the *train.py* script should show logs of the following form:
-I saved the logs from the current *model.pth* under *./demo/inference_logs*.
 ```bash
 python3 inference.py
 ```
@@ -42,7 +40,7 @@ To adjust parameters, modify the *constants.py* file.
 
 ## Code Structure
 
-
+![png](docu/code-structure.drawio.svg)
 
 
 
@@ -79,6 +77,8 @@ $center = y[0:3]$<br>
 $size = softplus(y[3:6])$<br>
 $angles = tanh(y[6:9])*(π/4)$
 
++-45 degrees for rotation chosen, because after 45 degree you can just change the widths. Regarding rotation of the cube, maybe quaternion or another rotation representaiton performs better. my approach to implementing the rotation of the cube was limited by time. the tanh function probably is problematic because values close to +-45 degrees are hard too reach. I choose euler here, because it is simple. though no risk of gimble lock because of chosen degrees of +-45,but non homogenous distribution makes euler problematic
+
 **Loss Function** [`utils/geometry.py`]
 
 code:
@@ -87,20 +87,23 @@ loss = loss_bb(bb, bb_truth)
 
 $\mathcal{L} = \left( \min_{\sigma \in \mathcal{P}} \sum_{i=1}^{8} \| \mathbf{b}_{\sigma(i)} - \mathbf{b}^{\text{truth}}_i \| \right)^2$
 
-this is the loss for one bounding box. over one batch, the loss is averaged.
-first I tought about a loss function 
+this is the loss for one bounding box. over one batch, the loss is averaged. b is a corner of bounding box bb.
+calcultaing loss via center, size and angles directly would also be possible, but you would need to toake care of balance factors.
+calculating loss via cutting volume is complicated.
+In this loss however only distance vectors need to be calculated, that is for all rotation permutation of a cube, that are 24 permutation, the destiance vectors between the 8 ground trouth corner and 8 prediction corner are summed up. the smallest of these 24 sums is squared, which is then the loss.
 
-reason, I chose this loss function is the following: 
+## Demo
 
-....then show also graph of loss
+loss function....
+both infernce and train loss to know weither the model under- or overfits.
 
+image of inference.....
 
-## TODO
-
-
-
-
-## Credits
+## Credits and Next Steps
 
 I did this project without the help of others. Furthermore, I conciously did not do any research on how 3D bounding boxes are solved nowadays to have a higher learning effect.
 The loss function came from my own thoughts and is not a suggestion from an AI. Neither did I read it up somewhere.
+Next thing on this project, I would improve is code quality and structure. Time was running out. Some functions need to be done smaller. comment more and better. Also I would add more pytests to the project.
+After that Hyperparameters like the learning rate I would adjust.
+Also architecture needs improvement.
+Investigation weither quaternion or other rotaion representation performs better.
