@@ -79,9 +79,9 @@ The number of linear layers was increased until the loss started to decrease.
 bb = create_bb(y)
 ```
 
-$bb = rot\_fn(base*size) + center$
+$bb = rotationfn(base*size) + center$
 
-rot_fn, size and center are all derived from y:<br>
+rotationfn, size and center are all derived from y:<br>
 $center = y[0:3]$<br>
 $size = softplus(y[3:6])$<br>
 $angles = tanh(y[6:9])*(π/4)$
