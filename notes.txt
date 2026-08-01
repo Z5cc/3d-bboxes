@@ -1,0 +1,8 @@
+maybe fuse data channels
+
+maybe yolo-based architecture, being able to inference from any input size. like oneshot. not having to cut image in snippets
+
+check metric. work on loss function first. before changingn anything on architecture. because then i still have somehting to compare
+
+inferencing center. calculate corners from it with analytic hardcoded function. calculate loss with corners [better option, because it is easier to inference center]
+inferencing corner. calcualte loss with corners

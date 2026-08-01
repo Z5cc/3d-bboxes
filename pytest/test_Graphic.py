@@ -1,0 +1,45 @@
+import pytest
+from unittest.mock import patch
+import numpy as np
+
+from Graphic import Graphic
+
+
+
+def test_plot_losses(tmp_path, monkeypatch): # tmp_path and monkeypatch are 'built-in fixtures' from pytest
+    monkeypatch.chdir(tmp_path) # instead of os.chdir
+    graphic = Graphic()
+    graphic.plot_losses([1.0, 0.5], [1.2, 0.7])
+    assert (tmp_path / 'loss.png').exists()
+
+
+def test_plot_all(visualize=False):
+    graphic = Graphic()
+    box = np.random.rand(8,3)
+    box1 = np.array([
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 1, 1],
+    ])
+
+    box2 = np.array([
+        [2, 2, 0],
+        [3, 2, 0],
+        [3, 3, 0],
+        [2, 3, 0],
+        [2, 2, 2],
+        [3, 2, 2],
+        [3, 3, 2],
+        [2, 3, 2],
+    ])
+    if visualize:
+        graphic.plot_all([box1,box2], [box1,box2])
+    else:
+        with patch('matplotlib.pyplot.show') as mock_show:
+            graphic.plot_all([box1,box2], [box1,box2])
+    assert mock_show.called

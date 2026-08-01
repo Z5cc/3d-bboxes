@@ -8,8 +8,9 @@ EPOCHS = 100
 
 # dataset path
 TRAIN_PATH = './dl_challenge_train'
+VAL_PATH = './dl_challenge_val'
 TEST_PATH = './dl_challenge_test'
-MODEL_PATH = './model.pth'
+MODEL_PATH = './model.pth1'
 # permutatios of cube
 PERMS = [
     [0,1,2,3,4,5,6,7],[1,2,3,0,5,6,7,4],[2,3,0,1,6,7,4,5],[3,0,1,2,7,4,5,6], # Top up

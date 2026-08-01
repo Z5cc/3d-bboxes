@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
 
 
 class Network(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.pool1 = nn.AvgPool2d((2,2),stride=(2,2))
