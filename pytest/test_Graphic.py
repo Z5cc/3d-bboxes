@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch
 import numpy as np
 
@@ -15,7 +14,6 @@ def test_plot_losses(tmp_path, monkeypatch): # tmp_path and monkeypatch are 'bui
 
 def test_plot_all(visualize=False):
     graphic = Graphic()
-    box = np.random.rand(8,3)
     box1 = np.array([
         [0, 0, 0],
         [1, 0, 0],
@@ -26,7 +24,6 @@ def test_plot_all(visualize=False):
         [1, 1, 1],
         [0, 1, 1],
     ])
-
     box2 = np.array([
         [2, 2, 0],
         [3, 2, 0],
