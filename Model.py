@@ -39,7 +39,6 @@ class Model():
                 y = self.model(x) # [N,3]
                 bb = create_bb(y) # [N,8,3]
                 loss = loss_bb(bb, bb_truth) # [N]
-                loss = loss.mean() # scalar
                 epoch_loss+=loss.item()
                 i+=1
                 print(f'train loss: {loss.item()}')
@@ -69,7 +68,6 @@ class Model():
                 y = self.model(x) # [N]
                 bb = create_bb(y) # [N,8,3] with N=1
                 loss = loss_bb(bb, bb_truth)
-                loss = loss.mean()
                 total_loss+=loss.item()
                 i+=1
                 print(f'inference loss: {loss.item()}')

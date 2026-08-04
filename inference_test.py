@@ -1,4 +1,4 @@
 from Model import Model
 
 model = Model()
-model.inference(model_path='model.pth')
+model.inference(model_path='model.pth18')
