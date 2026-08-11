@@ -5,3 +5,4 @@ __pycache__/
 dl_challenge_train
 dl_challenge_val
 dl_challenge_test
+weights

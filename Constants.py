@@ -1,10 +1,13 @@
+import torch
+
 # sizes of input images
 H=256
 W=256
 # batch size
 N = 8
 # epochs
-EPOCHS = 100
+EPOCHS = 1
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # dataset path
 TRAIN_PATH = './dl_challenge_train'

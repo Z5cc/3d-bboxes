@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy as np
 import torch
@@ -10,7 +11,7 @@ from Dataset_dl_challenge import Dataset_dl_challenge
 from Graphic import Graphic
 from Network import Network
 from Geometry import create_bb, loss_bb
-from Constants import TRAIN_PATH, TEST_PATH, MODEL_PATH, EPOCHS, N
+from Constants import TRAIN_PATH, TEST_PATH, MODEL_PATH, EPOCHS, N, DEVICE
 
 
 
@@ -19,7 +20,8 @@ from Constants import TRAIN_PATH, TEST_PATH, MODEL_PATH, EPOCHS, N
 
 class Model():
     def __init__(self):
-        self.model = Network()
+        print(f'using device: {DEVICE}')
+        self.model = Network().to(DEVICE)
         self.graphic = Graphic()
 
 
@@ -33,7 +35,10 @@ class Model():
             epoch_loss = 0
             i = 0
             print(f'\nEPOCH: {epoch}')
+            start = time.time()
             for x, bb_truth in train_loader:
+                x = x.to(DEVICE)
+                bb_truth = bb_truth.to(DEVICE)
                 optimizer.zero_grad()
 
                 y = self.model(x) # [N,3]
@@ -51,6 +56,7 @@ class Model():
             train_losses.append(avg_loss_train)
             test_losses.append(avg_loss_test)
             self.graphic.plot_losses(train_losses,test_losses)
+            print(f'computing time for epoch {epoch}: {(time.time()-start):.2f} s')
 
 
 
@@ -60,18 +66,20 @@ class Model():
         test_loader = DataLoader(test_data)
         bb_all = []
 
-        # inference
+        # inferenceto(
         with torch.no_grad():
             total_loss=0
             i=0
             for x, bb_truth in test_loader:
+                x = x.to(DEVICE)
+                bb_truth = bb_truth.to(DEVICE)
                 y = self.model(x) # [N]
                 bb = create_bb(y) # [N,8,3] with N=1
                 loss = loss_bb(bb, bb_truth)
                 total_loss+=loss.item()
                 i+=1
                 print(f'inference loss: {loss.item()}')
-                bb = bb.numpy() # torch -> numpy
+                bb = bb.cpu().numpy() # torch -> numpy
                 bb_all.append(bb)
             avg_loss_test = total_loss/i
 

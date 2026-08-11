@@ -7,7 +7,7 @@ from Constants import PERMS
 
 def loss_bb(bb, bb_truth): # [N,8,3]
     # calculate delta between ground truth and all permutations of inference result
-    perms = torch.tensor(PERMS, dtype=torch.long) # [24,8]
+    perms = torch.tensor(PERMS, dtype=torch.long, device=bb.device) # [24,8]
     bb_perm = bb[:,perms,:] # [N,24,8,3]
     bb_truth = bb_truth.unsqueeze(1) # [N,1,8,3]
     bb_delta = bb_truth - bb_perm # [N,24,8,3]
@@ -24,7 +24,7 @@ def create_bb(y): # [N,9]
     # 0. BASE OF BOUNDING BOX
     bb = torch.tensor([[-0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[0.5,-0.5,-0.5],
                          [-0.5,-0.5,0.5],[-0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,-0.5,0.5]],
-                         dtype = torch.float)
+                         dtype = torch.float, device=y.device)
     bb = bb[None,:,:] # [N,8,3]
 
     # 1. SCALE
@@ -36,7 +36,7 @@ def create_bb(y): # [N,9]
     angles = (torch.tanh(y[:,6:9])) * (torch.pi/4) # [N,3]
     cx, cy, cz = torch.cos(angles[:,0]), torch.cos(angles[:,1]), torch.cos(angles[:,2]) # [N]
     sx, sy, sz = torch.sin(angles[:,0]), torch.sin(angles[:,1]), torch.sin(angles[:,2]) # [N]
-    R = torch.zeros((y.shape[0], 3, 3)) # [N,3,3]
+    R = torch.zeros((y.shape[0], 3, 3),device=y.device) # [N,3,3]
 
     R[:,0,0] = cy * cz
     R[:,0,1] = cz * sx * sy - cx * sz
