@@ -1,3 +1,5 @@
+IDEAS:
+
 maybe fuse data channels
 
 maybe yolo-based architecture, being able to inference from any input size. like oneshot. not having to cut image in snippets
@@ -6,3 +8,34 @@ check metric. work on loss function first. before changingn anything on architec
 
 inferencing center. calculate corners from it with analytic hardcoded function. calculate loss with corners [better option, because it is easier to inference center]
 inferencing corner. calcualte loss with corners
+
+
+
+
+
+
+TODO:
+-resnet
+-regularizing
+-docu
+
+
+
+
+
+CURRENT TASKS:
+
+train and eval mode
+
+continue with automatic script, copy weights and graphs back. make a system. so i can run a lot of experiments at once:
+argument for train.py: folder_name
+if folder_name not given, then default folder name. which is overwritten each time
+
+
+
+
+
+
+relative paths to absolute paths
+
+delete also empty folders after train
