@@ -28,14 +28,14 @@ class Model():
     def train(self):
         optimizer = optim.Adam(self.model.parameters())
         train_data = Dataset_dl_challenge(TRAIN_PATH)
-        train_loader = DataLoader(train_data, batch_size=N, shuffle=True)
+        train_loader = DataLoader(train_data, batch_size=N, shuffle=True, pin_memory=True, num_workers=4, persistent_workers=False)
         train_losses, test_losses = [], []
 
         for epoch in range(EPOCHS):
-            epoch_loss = 0
-            i = 0
-            print(f'\nEPOCH: {epoch}')
             start = time.time()
+            self.model.train() # in each epoch in later in inference model will be put to eval mode
+            epoch_loss = 0
+            print(f'\nEPOCH: {epoch}')
             for x, bb_truth in train_loader:
                 x = x.to(DEVICE)
                 bb_truth = bb_truth.to(DEVICE)
@@ -45,14 +45,14 @@ class Model():
                 bb = create_bb(y) # [N,8,3]
                 loss = loss_bb(bb, bb_truth) # [N]
                 epoch_loss+=loss.item()
-                i+=1
                 print(f'train loss: {loss.item()}')
                 loss.backward()
                 optimizer.step()
             model_path = f'{MODEL_PATH}{epoch}'
             torch.save(self.model.state_dict(), model_path)
+
             avg_loss_test = self.inference(vis=False, model_path=model_path)
-            avg_loss_train = epoch_loss/i
+            avg_loss_train = epoch_loss/len(train_loader) # device by number of batches
             train_losses.append(avg_loss_train)
             test_losses.append(avg_loss_test)
             self.graphic.plot_losses(train_losses,test_losses)
@@ -61,15 +61,14 @@ class Model():
 
 
     def inference(self, vis=True, model_path=MODEL_PATH):
+        self.model.eval()
         self.model.load_state_dict(torch.load(model_path, weights_only=True))
         test_data = Dataset_dl_challenge(TEST_PATH)
         test_loader = DataLoader(test_data)
         bb_all = []
 
-        # inferenceto(
         with torch.no_grad():
             total_loss=0
-            i=0
             for x, bb_truth in test_loader:
                 x = x.to(DEVICE)
                 bb_truth = bb_truth.to(DEVICE)
@@ -77,11 +76,10 @@ class Model():
                 bb = create_bb(y) # [N,8,3] with N=1
                 loss = loss_bb(bb, bb_truth)
                 total_loss+=loss.item()
-                i+=1
                 print(f'inference loss: {loss.item()}')
                 bb = bb.cpu().numpy() # torch -> numpy
                 bb_all.append(bb)
-            avg_loss_test = total_loss/i
+            avg_loss_test = total_loss/len(test_loader) # divide by number of batches
 
         # group bb with idx_cumul
         idx_cumul = test_data.get_idx_cumul()

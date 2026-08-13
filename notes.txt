@@ -25,7 +25,6 @@ TODO:
 
 CURRENT TASKS:
 
-train and eval mode
 
 continue with automatic script, copy weights and graphs back. make a system. so i can run a lot of experiments at once:
 argument for train.py: folder_name
@@ -35,7 +34,3 @@ if folder_name not given, then default folder name. which is overwritten each ti
 
 
 
-
-relative paths to absolute paths
-
-delete also empty folders after train
