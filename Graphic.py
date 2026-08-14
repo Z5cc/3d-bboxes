@@ -5,8 +5,8 @@ import numpy as np
 
 
 class Graphic:
-    def __init__(self):
-        pass
+    def __init__(self, exp_folder):
+        self.exp_folder = exp_folder
 
     def plot_box(self, ax, b, idx, color):
         verts = [[b[0],b[1],b[2],b[3]],[b[4],b[5],b[6],b[7]],[b[0],b[3],b[7],b[4]],[b[3],b[2],b[6],b[7]],[b[2],b[1],b[5],b[6]],[b[0],b[1],b[5],b[4]]]
@@ -48,6 +48,6 @@ class Graphic:
         ax.set_ylim(0,2)
         ax.legend()
         ax.grid()
-        fig.savefig("loss.png", dpi=200)
+        fig.savefig(self.exp_folder / "loss.png", dpi=200)
         plt.close(fig)
         

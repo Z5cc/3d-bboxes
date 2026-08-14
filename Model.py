@@ -1,101 +1,87 @@
-import os
-import time
-
-import numpy as np
 import torch
-
-import torch.optim as optim
-from torch.utils.data import DataLoader
-
-from Dataset_dl_challenge import Dataset_dl_challenge
-from Graphic import Graphic
-from Network import Network
-from Geometry import create_bb, loss_bb
-from Constants import TRAIN_PATH, TEST_PATH, MODEL_PATH, EPOCHS, N, DEVICE
+import torch.nn as nn
+import torch.nn.functional as F
 
 
-
-
-
-
-class Model():
+class Model(nn.Module):
     def __init__(self):
-        print(f'using device: {DEVICE}')
-        self.model = Network().to(DEVICE)
-        self.graphic = Graphic()
+        super().__init__()
+        self.pool1 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.pool2 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.pool3 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.pool4 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.pool5 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.conv1 = nn.Conv2d(4,8,(3,3),padding='same')
+        self.conv2 = nn.Conv2d(8,16,(3,3),padding='same')
+        self.conv3 = nn.Conv2d(16,32,(3,3),padding='same')
+        self.conv4 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv5 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv6 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv7 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv8 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv9 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.conv10 = nn.Conv2d(32,32,(3,3),padding='same')
+        self.lin1 = nn.Linear(8*8*32, 512)
+        self.lin2 = nn.Linear(512,128)
+        self.lin3 = nn.Linear(128,9)
 
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = self.pool1(x)
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = self.pool2(x)
+        x = F.relu(self.conv5(x))
+        x = F.relu(self.conv6(x))
+        x = self.pool3(x)
+        x = F.relu(self.conv7(x))
+        x = F.relu(self.conv8(x))
+        x = self.pool4(x)
+        x = F.relu(self.conv9(x))
+        x = F.relu(self.conv10(x))
+        x = self.pool5(x)
+        x = torch.flatten(x, start_dim=1)
+        x = F.relu(self.lin1(x))
+        x = F.relu(self.lin2(x))
+        x = self.lin3(x)
+        x = self.create_bb(x)
+        return x
 
-    def train(self):
-        optimizer = optim.Adam(self.model.parameters())
-        train_data = Dataset_dl_challenge(TRAIN_PATH)
-        train_loader = DataLoader(train_data, batch_size=N, shuffle=True, pin_memory=True, num_workers=4, persistent_workers=False)
-        train_losses, test_losses = [], []
+    def create_bb(self, y): # [N,9]
+        # 0. BASE OF BOUNDING BOX
+        bb = torch.tensor([[-0.5,-0.5,-0.5],[-0.5,0.5,-0.5],[0.5,0.5,-0.5],[0.5,-0.5,-0.5],
+                            [-0.5,-0.5,0.5],[-0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,-0.5,0.5]],
+                            dtype = torch.float, device=y.device)
+        bb = bb[None,:,:] # [N,8,3]
 
-        for epoch in range(EPOCHS):
-            start = time.time()
-            self.model.train() # in each epoch in later in inference model will be put to eval mode
-            epoch_loss = 0
-            print(f'\nEPOCH: {epoch}')
-            for x, bb_truth in train_loader:
-                x = x.to(DEVICE)
-                bb_truth = bb_truth.to(DEVICE)
-                optimizer.zero_grad()
+        # 1. SCALE
+        size = y[:,None, 3:6] # [N,1,3]
+        size = F.softplus(size)
+        bb = bb * size  # [N,8,3]
 
-                y = self.model(x) # [N,3]
-                bb = create_bb(y) # [N,8,3]
-                loss = loss_bb(bb, bb_truth) # [N]
-                epoch_loss+=loss.item()
-                print(f'train loss: {loss.item()}')
-                loss.backward()
-                optimizer.step()
-            model_path = f'{MODEL_PATH}{epoch}'
-            torch.save(self.model.state_dict(), model_path)
+        # 2. ROTATE
+        angles = (torch.tanh(y[:,6:9])) * (torch.pi/4) # [N,3]
+        cx, cy, cz = torch.cos(angles[:,0]), torch.cos(angles[:,1]), torch.cos(angles[:,2]) # [N]
+        sx, sy, sz = torch.sin(angles[:,0]), torch.sin(angles[:,1]), torch.sin(angles[:,2]) # [N]
+        R = torch.zeros((y.shape[0], 3, 3),device=y.device) # [N,3,3]
 
-            avg_loss_test = self.inference(vis=False, model_path=model_path)
-            avg_loss_train = epoch_loss/len(train_loader) # device by number of batches
-            train_losses.append(avg_loss_train)
-            test_losses.append(avg_loss_test)
-            self.graphic.plot_losses(train_losses,test_losses)
-            print(f'computing time for epoch {epoch}: {(time.time()-start):.2f} s')
+        R[:,0,0] = cy * cz
+        R[:,0,1] = cz * sx * sy - cx * sz
+        R[:,0,2] = cx * cz * sy + sx * sz
 
+        R[:,1,0] = cy * sz
+        R[:,1,1] = cx * cz + sx * sy * sz
+        R[:,1,2] = -cz * sx + cx * sy * sz
 
+        R[:,2,0] = -sy
+        R[:,2,1] = cy * sx
+        R[:,2,2] = cx * cy
 
-    def inference(self, vis=True, model_path=MODEL_PATH):
-        self.model.eval()
-        self.model.load_state_dict(torch.load(model_path, weights_only=True))
-        test_data = Dataset_dl_challenge(TEST_PATH)
-        test_loader = DataLoader(test_data)
-        bb_all = []
+        bb = torch.matmul(bb, R.transpose(1,2)) # [N,8,3]=[N,8,3]*[N,3,3]
 
-        with torch.no_grad():
-            total_loss=0
-            for x, bb_truth in test_loader:
-                x = x.to(DEVICE)
-                bb_truth = bb_truth.to(DEVICE)
-                y = self.model(x) # [N]
-                bb = create_bb(y) # [N,8,3] with N=1
-                loss = loss_bb(bb, bb_truth)
-                total_loss+=loss.item()
-                print(f'inference loss: {loss.item()}')
-                bb = bb.cpu().numpy() # torch -> numpy
-                bb_all.append(bb)
-            avg_loss_test = total_loss/len(test_loader) # divide by number of batches
+        # 3. SHIFT
+        center = y[:,None,0:3] # [N,1,3]
+        bb = bb + center
 
-        # group bb with idx_cumul
-        idx_cumul = test_data.get_idx_cumul()
-        idx_cumul_zero = [0]+idx_cumul
-        bb_per_folder = [
-            bb_all[start:end]
-            for start, end in zip(idx_cumul_zero[:-1], idx_cumul_zero[1:])
-        ]
-        bb_per_folder = [np.concatenate(one_folder, axis=0) for one_folder in bb_per_folder]
-
-        if vis==True:
-            # visualization
-            for name, bb_inf in zip(test_data.get_names(), bb_per_folder):
-                bbox3d_path = os.path.join(TEST_PATH,name,'bbox3d.npy')
-                bb_truth = np.load(bbox3d_path) # [E,8,3]
-                
-                self.graphic.plot_all(bb_inf, bb_truth)
-
-        return avg_loss_test
+        return bb # [N,8,3]

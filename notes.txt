@@ -10,7 +10,8 @@ inferencing center. calculate corners from it with analytic hardcoded function. 
 inferencing corner. calcualte loss with corners
 
 
-
+OTHERS:
+sudo apt-get update && sudo apt-get install --reinstall -y rsync
 
 
 
@@ -30,7 +31,7 @@ continue with automatic script, copy weights and graphs back. make a system. so 
 argument for train.py: folder_name
 if folder_name not given, then default folder name. which is overwritten each time
 
-
+using better gpu does not improve anything. so computation time on cpu is probably the issue....
 
 
 
