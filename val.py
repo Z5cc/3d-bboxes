@@ -9,18 +9,18 @@ from Dataset_dl_challenge import Dataset_dl_challenge
 from Graphic import Graphic
 from Model import Model
 from Criterion import Criterion
-from Constants import TEST_PATH, DEFAULT_INFERENCE_EXP, DEVICE
+from Constants import VAL_PATH, DEFAULT_INFERENCE_EXP, DEVICE
 
 
 
-
-def val(vis=True, model_path=DEFAULT_INFERENCE_EXP / "model.pth", graphic=Graphic(DEFAULT_INFERENCE_EXP)):
+def val(data_folder, exp_folder, vis=True):
     print(f'using device: {DEVICE}\n')
+    graphic = Graphic(exp_folder)
     model = Model().to(DEVICE)
     criterion = Criterion().to(DEVICE)
     model.eval()
-    model.load_state_dict(torch.load(model_path, weights_only=True))
-    test_data = Dataset_dl_challenge(TEST_PATH)
+    model.load_state_dict(torch.load(exp_folder / "model.pth", map_location=DEVICE, weights_only=True))
+    test_data = Dataset_dl_challenge(data_folder)
     test_loader = DataLoader(test_data, num_workers=4, persistent_workers=True)
     bb_all = []
 
@@ -53,7 +53,7 @@ def val(vis=True, model_path=DEFAULT_INFERENCE_EXP / "model.pth", graphic=Graphi
     if vis==True:
         # visualization
         for name, bb_inf in zip(test_data.get_names(), bb_per_folder):
-            bbox3d_path = os.path.join(TEST_PATH,name,'bbox3d.npy')
+            bbox3d_path = os.path.join(data_folder,name,'bbox3d.npy')
             bb_truth = np.load(bbox3d_path) # [E,8,3]
             
             graphic.plot_all(bb_inf, bb_truth)
@@ -62,6 +62,5 @@ def val(vis=True, model_path=DEFAULT_INFERENCE_EXP / "model.pth", graphic=Graphi
 
 
 
-
 if __name__ == '__main__':
-    val()
+    val(data_folder=VAL_PATH,exp_folder=DEFAULT_INFERENCE_EXP)

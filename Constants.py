@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parent
 TRAIN_PATH = ROOT / 'dl_challenge_train'
 VAL_PATH = ROOT / 'dl_challenge_val'
 TEST_PATH = ROOT / 'dl_challenge_test'
+DEFAULT_SAVE_EXP = ROOT / 'exp_'
 DEFAULT_INFERENCE_EXP = ROOT / 'exp_'
+
 
 # permutatios of cube
 PERMS = [
