@@ -34,4 +34,34 @@ if folder_name not given, then default folder name. which is overwritten each ti
 using better gpu does not improve anything. so computation time on cpu is probably the issue....
 
 
+maybe reason why squared loss performs worse: having non stetig loss function is even more volatile and worse with quadratic loss
 
+
+
+get loss function so good that it worked like before. maybe huber loss
+see if i have outlier -> tat could be the problem for pure L2 loss. also understand theory of cube loss, if loss jumps or knick when permutation changes....
+
+
+
+going to use MSE and RMSE ... to be able to compare both need to calculate RMSE always as metric ...question where is ROOT calculated
+
+to be able to compare loss function properly
+
+
+
+loss and metric
+
+loss from train and loss from val
+....but also want to see how train from one 
+
+
+
+
+
+z upwards, images on ground as reference or on side. display also data number
+
+undrstand why few images fit perfect why others do not fit at all
+maybe fewer box closer zoom by matplotlib -> how image on bottom
+maybe if all bad boxes are from same image, then it is corrupted data from tath one image, noise which neds to be remove
+
+understand why no overfitting. maybe just let it. just accept it....

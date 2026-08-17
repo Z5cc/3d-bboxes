@@ -1,13 +1,20 @@
 import torch
 from pathlib import Path
 
+
+
+N = 8
+EPOCHS = 3000
+LR = 0.001
+
+
+
+
+
 # sizes of input images
 H=256
 W=256
-# batch size
-N = 8
-# epochs
-EPOCHS = 1
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # dataset path
@@ -15,8 +22,8 @@ ROOT = Path(__file__).resolve().parent
 TRAIN_PATH = ROOT / 'dl_challenge_train'
 VAL_PATH = ROOT / 'dl_challenge_val'
 TEST_PATH = ROOT / 'dl_challenge_test'
-DEFAULT_SAVE_EXP = ROOT / 'exp_'
-DEFAULT_INFERENCE_EXP = ROOT / 'exp_'
+DEFAULT_SAVE_EXP = ROOT / 'exp_MSE_3000'
+DEFAULT_INFERENCE_EXP = ROOT / 'exp_MSE_3000'
 
 
 # permutatios of cube
