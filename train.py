@@ -9,8 +9,15 @@ from Graphic import Loss_Graphic
 from Model import Model
 from Criterion import MSE, MAE, RMSE
 from val import val
-from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR
+from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS
 
+
+
+
+# def print_gradients(model):
+#     for name, param in model.named_parameters():
+#         if param.grad is not None:
+#             print(f"{name:40s} {param.grad.abs().mean():.3e}")
 
 
 def train(exp_folder=DEFAULT_SAVE_EXP):
@@ -20,8 +27,9 @@ def train(exp_folder=DEFAULT_SAVE_EXP):
     criterion = MSE().to(DEVICE)
     graphic = Loss_Graphic(exp_folder)
     optimizer = optim.Adam(model.parameters(),lr=LR)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=20,factor=0.7)
     train_data = Dataset_dl_challenge(TRAIN_PATH)
-    train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=4, persistent_workers=True, pin_memory=True)
+    train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     train_loss, val_loss, val_RMSE = [], [], []
 
 
@@ -31,7 +39,6 @@ def train(exp_folder=DEFAULT_SAVE_EXP):
         total_loss = torch.zeros((), device=DEVICE)
 
         for x, bb_truth in train_loader:
-
             # GPU
             x = x.to(DEVICE, non_blocking=True)
             bb_truth = bb_truth.to(DEVICE, non_blocking=True)
@@ -42,19 +49,18 @@ def train(exp_folder=DEFAULT_SAVE_EXP):
             total_loss+=loss.detach()
 
             loss.backward()
+            # print_gradients(model)
             optimizer.step()
 
         torch.save(model.state_dict(), exp_folder / 'model.pth')
 
-        avg_val_RMSE = val(data_folder=VAL_PATH,exp_folder=exp_folder,vis=False)
-        avg_val_loss = val(data_folder=VAL_PATH,exp_folder=exp_folder,criterion=criterion,vis=False)
-        avg_train_loss = total_loss.item()/len(train_loader) # divide by number of batches
-        val_RMSE.append(avg_val_RMSE)
-        val_loss.append(avg_val_loss)
-        train_loss.append(avg_train_loss)
-        graphic.plot_losses(train_loss,val_loss)
-        graphic.plot_RMSE(val_RMSE)
-        print(f'EPOCH: {epoch}. computing time: {(time.time()-start):.2f}s. avg_train_loss: {avg_train_loss:.4f}. avg_val_loss: {avg_val_loss:.4f}.\n')
+        # avg_val_loss = val(data_folder=VAL_PATH,exp_folder=exp_folder,criterion=criterion,vis=False)
+        # avg_train_loss = total_loss.item()/len(train_loader) # divide by number of batches
+        # val_loss.append(avg_val_loss)
+        # train_loss.append(avg_train_loss)
+        # graphic.plot_losses(train_loss,val_loss)
+        print(f'EPOCH: {epoch}. computing time: {(time.time()-start):.2f}s.')
+        # scheduler.step(avg_val_loss)
 
 
 

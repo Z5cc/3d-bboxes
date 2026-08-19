@@ -11,35 +11,15 @@ class BB_Graphic:
     def __init__(self, data_folder):
         self.data_folder = data_folder
 
-    def plot_box(self, ax, b, idx, color):
-        verts = [[b[0],b[1],b[2],b[3]],[b[4],b[5],b[6],b[7]],[b[0],b[3],b[7],b[4]],[b[3],b[2],b[6],b[7]],[b[2],b[1],b[5],b[6]],[b[0],b[1],b[5],b[4]]]
-        ax.add_collection3d(Poly3DCollection(verts,facecolors=color, linewidths=1, edgecolors='black', alpha=.1))
-        for i, (x, y, z) in enumerate(b):
-            ax.text(x, y, z, str(i), color=color)
-        # label of box
-        center = np.mean(b, axis=0)
-        ax.text(
-            center[0], center[1], center[2],
-            str(idx),
-            color=color,
-            fontsize=20,
-            ha='center',
-            va='center')
-
-    def plot_boxes(self,ax, bbox3d, color):
-        for idx,b in enumerate(bbox3d):
-            self.plot_box(ax,b,idx, color)
-
-    def plot_rgb(self,ax,rgb):
-        ax.imshow(rgb)
-        ax.axis('off')
-
-    def plot_all(self, name, bb_inf):
+    def plot(self, name, bb_inf):
         rgb_path = self.data_folder / name / 'rgb.jpg'
         bbox3d_path = self.data_folder / name / 'bbox3d.npy'
         rgb = plt.imread(rgb_path)
         bb_truth = np.load(bbox3d_path) # [E,8,3]
+        self._plot(name, bb_inf, bb_truth, rgb)
 
+
+    def _plot(self, name, bb_inf, bb_truth, rgb):
         fig = plt.figure(figsize=(16,10),layout='constrained')
         fig.canvas.manager.set_window_title(name)
         ax1 = plt.subplot2grid((1, 3), (0, 0), fig=fig)
@@ -62,6 +42,34 @@ class BB_Graphic:
         ax2.view_init(vertical_axis='z',elev=-20,azim=100,roll=180) # elev=200.   only adjust azim now
         plt.show()
         plt.close(fig)
+
+
+    def plot_boxes(self,ax, bbox3d, color):
+        for idx,b in enumerate(bbox3d):
+            self.plot_box(ax,b,idx, color)
+
+    def plot_box(self, ax, b, idx, color):
+        verts = [[b[0],b[1],b[2],b[3]],[b[4],b[5],b[6],b[7]],[b[0],b[3],b[7],b[4]],[b[3],b[2],b[6],b[7]],[b[2],b[1],b[5],b[6]],[b[0],b[1],b[5],b[4]]]
+        ax.add_collection3d(Poly3DCollection(verts,facecolors=color, linewidths=1, edgecolors='black', alpha=.1))
+        for i, (x, y, z) in enumerate(b):
+            ax.text(x, y, z, str(i), color=color)
+        # label of box
+        center = np.mean(b, axis=0)
+        ax.text(
+            center[0], center[1], center[2],
+            str(idx),
+            color=color,
+            fontsize=20,
+            ha='center',
+            va='center')
+
+
+
+    def plot_rgb(self,ax,rgb):
+        ax.imshow(rgb)
+        ax.axis('off')
+
+
 
     # def plot_ground(self, ax, rgb, z=1.4, resolution=2):
     #     rgb = rgb.astype(float) / 255.0
@@ -88,7 +96,7 @@ class Loss_Graphic:
         ax.plot(test_loss, label='test_loss', color='red')
         ax.set_xlabel('epoch')
         ax.set_ylabel('loss')
-        # ax.set_ylim(0,2)
+        ax.set_ylim(0,0.01)
         ax.legend()
         ax.grid()
         fig.savefig(self.exp_folder / "loss.png", dpi=200)
@@ -99,7 +107,7 @@ class Loss_Graphic:
         ax.plot(RMSE, label='val_RMSE', color='green')
         ax.set_xlabel('epoch')
         ax.set_ylabel('RMSE')
-        # ax.set_ylim(0,2)
+        ax.set_ylim(0,0.1)
         ax.legend()
         ax.grid()
         fig.savefig(self.exp_folder / "RMSE.png", dpi=200)

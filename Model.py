@@ -6,11 +6,11 @@ import torch.nn.functional as F
 class Model(nn.Module):
     def __init__(self):
         super().__init__()
-        self.pool1 = nn.AvgPool2d((2,2),stride=(2,2))
-        self.pool2 = nn.AvgPool2d((2,2),stride=(2,2))
-        self.pool3 = nn.AvgPool2d((2,2),stride=(2,2))
-        self.pool4 = nn.AvgPool2d((2,2),stride=(2,2))
-        self.pool5 = nn.AvgPool2d((2,2),stride=(2,2))
+        self.pool1 = nn.MaxPool2d((2,2),stride=(2,2))
+        self.pool2 = nn.MaxPool2d((2,2),stride=(2,2))
+        self.pool3 = nn.MaxPool2d((2,2),stride=(2,2))
+        self.pool4 = nn.MaxPool2d((2,2),stride=(2,2))
+        self.pool5 = nn.MaxPool2d((2,2),stride=(2,2))
         self.conv1 = nn.Conv2d(4,8,(3,3),padding='same')
         self.conv2 = nn.Conv2d(8,16,(3,3),padding='same')
         self.conv3 = nn.Conv2d(16,32,(3,3),padding='same')

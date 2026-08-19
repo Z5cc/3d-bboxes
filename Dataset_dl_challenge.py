@@ -1,4 +1,5 @@
 import os
+import time
 import bisect
 
 import numpy as np
@@ -13,8 +14,8 @@ from Constants import H, W
 class Dataset_dl_challenge(Dataset):
     def __init__(self, path):
         self.path = path
-        self.names = []
-        self.idx_cumul = []
+        self.names = []     # ['983022a8-9915-11ee-9103-bbb8eae05561', '983022a9-9915-11ee-9103-bbb8eae05561', '983022aa-9915-11ee-9103-bbb8eae05561',...]
+        self.idx_cumul = [] # [5, 13, 14, ....] # first name contains 5 object that is 5 masks
         total = 0
         # sorting guarantees that 'names' and 'cumulative' stay consistent
         entries = sorted(os.scandir(self.path), key=lambda e: e.name)
@@ -25,38 +26,32 @@ class Dataset_dl_challenge(Dataset):
             self.names.append(name)
 
             # get amount of bounding boxes in 'bbox3d.npy' file for cumulative indices
-            bbox3d_path = os.path.join(self.path,name,'bbox3d.npy')
+            bbox3d_path = self.path / name / 'bbox3d.npy'
             bbox3d = np.load(bbox3d_path)
             size = len(bbox3d)
             total+=size
             self.idx_cumul.append(total)
 
+        self.bb_list = self.preload(self.load_bb)
+        self.x_list = self.preload(self.load_x)
 
-    def __len__(self):
-        return self.idx_cumul[-1]
+
+    def preload(self, load_fn):
+        preload_list = []
+        for idx in range(len(self)):
+            preload_list.append(load_fn(idx))
+        return preload_list
 
 
-    def __getitem__(self, idx):
-        # bulk_idx is idx of folder like '911224f8-9915-11ee-9103-bbb8eae05561'
-        bulk_idx = bisect.bisect(self.idx_cumul, idx)
-        # local_idx is for one mask or one box within that folder
-        if bulk_idx==0:
-            local_idx = idx
-        else:
-            local_idx = idx-self.idx_cumul[bulk_idx-1]
-
-        # get paths and access '.npy' files
-        name = self.names[bulk_idx]
-        bulk_path = os.path.join(self.path, name)
-        bbox3d_path = os.path.join(bulk_path, 'bbox3d.npy')
-        mask_path = os.path.join(bulk_path, 'mask.npy')
-        pc_path = os.path.join(bulk_path, 'pc.npy')
-
-        # bb
+    def load_bb(self, idx):
+        bbox3d_path, mask_path, pc_path, local_idx = self.idx_to_path_and_local_idx(idx)
         bb = np.load(bbox3d_path)[local_idx] # [E,8,3] -> [8,3]
         bb = torch.from_numpy(bb).float()
+        return bb
 
-        # x
+
+    def load_x(self, idx):
+        bbox3d_path, mask_path, pc_path, local_idx = self.idx_to_path_and_local_idx(idx)
         mask = np.load(mask_path)[local_idx] # [E,H,W] -> [H,W]
         pc = np.load(pc_path) # [3xHxW]
         # find center of mask
@@ -75,7 +70,41 @@ class Dataset_dl_challenge(Dataset):
         # then cut out H=256 and W=256 area out based on mask center
         x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
         x = torch.from_numpy(x).float()
+        return x
+
+    def idx_to_path_and_local_idx(self, idx):
+        # bulk_idx is idx of folder like '911224f8-9915-11ee-9103-bbb8eae05561'
+        bulk_idx = bisect.bisect(self.idx_cumul, idx)
+        # local_idx is for one mask or one box within that folder
+        if bulk_idx==0:
+            local_idx = idx
+        else:
+            local_idx = idx-self.idx_cumul[bulk_idx-1]
+
+        # get paths and access '.npy' files
+        name = self.names[bulk_idx]
+        bulk_path = self.path / name
+        bbox3d_path = bulk_path / 'bbox3d.npy'
+        mask_path = bulk_path / 'mask.npy'
+        pc_path = bulk_path / 'pc.npy'
+
+        return bbox3d_path, mask_path, pc_path, local_idx
+
+
+
+
+
+
+
+    def __len__(self):
+        return self.idx_cumul[-1]
+
+
+    def __getitem__(self, idx):
+        x = self.x_list[idx]
+        bb = self.bb_list[idx]
         return x, bb
+
     
     
     def get_names(self):

@@ -9,7 +9,7 @@ from Dataset_dl_challenge import Dataset_dl_challenge
 from Graphic import BB_Graphic
 from Model import Model
 from Criterion import RMSE
-from Constants import VAL_PATH, DEFAULT_INFERENCE_EXP, DEVICE
+from Constants import VAL_PATH, DEFAULT_INFERENCE_EXP, DEVICE, NUM_WORKERS
 
 
 
@@ -20,7 +20,7 @@ def val(data_folder, exp_folder, criterion=RMSE().to(DEVICE), vis=True):
     model.eval()
     model.load_state_dict(torch.load(exp_folder / "model.pth", map_location=DEVICE, weights_only=True))
     test_data = Dataset_dl_challenge(data_folder)
-    test_loader = DataLoader(test_data, num_workers=4, persistent_workers=True)
+    test_loader = DataLoader(test_data, num_workers=NUM_WORKERS)
     bb_all = []
 
     with torch.inference_mode():
@@ -28,8 +28,8 @@ def val(data_folder, exp_folder, criterion=RMSE().to(DEVICE), vis=True):
         for x, bb_truth in test_loader:
 
             # GPU
-            x = x.to(DEVICE, non_blocking=True)
-            bb_truth = bb_truth.to(DEVICE, non_blocking=True)
+            x = x.to(DEVICE)
+            bb_truth = bb_truth.to(DEVICE)
 
             bb = model(x) # [N,8,3] with N=1
             loss = criterion(bb, bb_truth) # [N]

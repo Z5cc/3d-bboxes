@@ -3,9 +3,13 @@ from pathlib import Path
 
 
 
-N = 8
-EPOCHS = 3000
+N = 32
+EPOCHS =200
 LR = 0.001
+NUM_WORKERS = 4 # RTX3060: 4, RTX5090: 8
+
+
+
 
 
 
@@ -22,8 +26,9 @@ ROOT = Path(__file__).resolve().parent
 TRAIN_PATH = ROOT / 'dl_challenge_train'
 VAL_PATH = ROOT / 'dl_challenge_val'
 TEST_PATH = ROOT / 'dl_challenge_test'
-DEFAULT_SAVE_EXP = ROOT / 'exp_MSE_3000'
-DEFAULT_INFERENCE_EXP = ROOT / 'exp_MSE_3000'
+
+DEFAULT_SAVE_EXP = ROOT / 'exp_5090'
+DEFAULT_INFERENCE_EXP = DEFAULT_SAVE_EXP
 
 
 # permutatios of cube
