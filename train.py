@@ -8,9 +8,8 @@ from Dataset_dl_challenge import Dataset_dl_challenge
 from Graphic import Loss_Graphic
 from Model import Model
 from Criterion import MSE, MAE, RMSE
-from val import val
+from val import evaluate
 from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS
-
 
 
 
@@ -20,7 +19,7 @@ from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP,
 #             print(f"{name:40s} {param.grad.abs().mean():.3e}")
 
 
-def train(exp_folder=DEFAULT_SAVE_EXP):
+def train(exp_folder):
     print(f'using device: {DEVICE}\n')
     exp_folder.mkdir(parents=True, exist_ok=True)
     model = Model().to(DEVICE)
@@ -29,9 +28,10 @@ def train(exp_folder=DEFAULT_SAVE_EXP):
     optimizer = optim.Adam(model.parameters(),lr=LR)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=20,factor=0.7)
     train_data = Dataset_dl_challenge(TRAIN_PATH)
+    val_data = Dataset_dl_challenge(VAL_PATH)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
-    train_loss, val_loss, val_RMSE = [], [], []
-
+    val_loader = DataLoader(val_data, num_workers=NUM_WORKERS)
+    train_loss_epochs, val_loss_epochs, val_RMSE_epochs = [], [], []
 
     for epoch in range(EPOCHS):
         start = time.time()
@@ -54,15 +54,15 @@ def train(exp_folder=DEFAULT_SAVE_EXP):
 
         torch.save(model.state_dict(), exp_folder / 'model.pth')
 
-        # avg_val_loss = val(data_folder=VAL_PATH,exp_folder=exp_folder,criterion=criterion,vis=False)
-        # avg_train_loss = total_loss.item()/len(train_loader) # divide by number of batches
-        # val_loss.append(avg_val_loss)
-        # train_loss.append(avg_train_loss)
-        # graphic.plot_losses(train_loss,val_loss)
+        val_loss = evaluate(val_loader,model,criterion)
+        train_loss = total_loss.item()/len(train_loader) # divide by number of batches
+        val_loss_epochs.append(val_loss)
+        train_loss_epochs.append(train_loss)
+        graphic.plot_losses(train_loss_epochs,val_loss_epochs)
         print(f'EPOCH: {epoch}. computing time: {(time.time()-start):.2f}s.')
-        # scheduler.step(avg_val_loss)
+        scheduler.step(val_loss)
 
 
 
 if __name__ == '__main__':
-    train()
+    train(DEFAULT_SAVE_EXP)

@@ -6,7 +6,7 @@ from pathlib import Path
 N = 32
 EPOCHS =200
 LR = 0.001
-NUM_WORKERS = 4 # RTX3060: 4, RTX5090: 8
+NUM_WORKERS = 1
 
 
 

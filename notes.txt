@@ -95,28 +95,6 @@ noise in data: maybe cropping of mask is bad
 
 
 
+maybe just create validation object...  for train .py?? faster
 
-
-
-        
-        start = time.time()
-        # x
-        mask = np.load(mask_path)[local_idx] # [E,H,W] -> [H,W]
-        pc = np.load(pc_path) # [3xHxW]
-        # find center of mask
-        coords = np.argwhere(mask)
-        h_min, w_min = coords.min(axis=0)
-        h_max, w_max = coords.max(axis=0)
-        ch = (h_min+h_max)//2
-        cw = (w_min+w_max)//2
-        # move center if center is too close to border
-        h = pc.shape[1]
-        w = pc.shape[2]
-        ch = min(max(ch,H//2-1),h-H//2-2)
-        cw = min(max(cw,W//2-1),w-W//2-2)
-        # concatenate mask and pc
-        x = np.concatenate([mask[None,:,:],pc], axis=0)
-        # then cut out H=256 and W=256 area out based on mask center
-        x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
-        x = torch.from_numpy(x).float()
-        print(f'OTHER LOADING TIME: {(time.time()-start):.4f}s.')
+see how much compute saving of model takes. maybe only save every fifth epoch

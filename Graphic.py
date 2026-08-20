@@ -11,15 +11,19 @@ class BB_Graphic:
     def __init__(self, data_folder):
         self.data_folder = data_folder
 
-    def plot(self, name, bb_inf):
+    def plot(self, bb_all, idx_cumul, names):
+        bb_per_folder = self.group_bb_per_folder(bb_all, idx_cumul)
+        for name, bb_inf in zip(names, bb_per_folder):
+            self.plot_one_folder(name, bb_inf)
+
+    def plot_one_folder(self, name, bb_inf):
         rgb_path = self.data_folder / name / 'rgb.jpg'
         bbox3d_path = self.data_folder / name / 'bbox3d.npy'
         rgb = plt.imread(rgb_path)
         bb_truth = np.load(bbox3d_path) # [E,8,3]
-        self._plot(name, bb_inf, bb_truth, rgb)
+        self._plot_one_folder(name, bb_inf, bb_truth, rgb)
 
-
-    def _plot(self, name, bb_inf, bb_truth, rgb):
+    def _plot_one_folder(self, name, bb_inf, bb_truth, rgb):
         fig = plt.figure(figsize=(16,10),layout='constrained')
         fig.canvas.manager.set_window_title(name)
         ax1 = plt.subplot2grid((1, 3), (0, 0), fig=fig)
@@ -63,26 +67,16 @@ class BB_Graphic:
             ha='center',
             va='center')
 
-
-
     def plot_rgb(self,ax,rgb):
         ax.imshow(rgb)
         ax.axis('off')
 
 
-
-    # def plot_ground(self, ax, rgb, z=1.4, resolution=2):
-    #     rgb = rgb.astype(float) / 255.0
-    #     rgb = rgb[::resolution, ::resolution]
-    #     h, w = rgb.shape[:2]
-    #     x = np.linspace(*ax.get_xlim(), w)
-    #     y = np.linspace(*ax.get_ylim(), h)
-    #     X, Y = np.meshgrid(x, y)
-    #     Z = np.full_like(X, z)
-    #     ax.plot_surface(X, Y, Z, facecolors=rgb, shade=False)
-
-
-
+    def group_bb_per_folder(self, bb_all, idx_cumul): # [E,8,3]
+        idx_start = [0]+idx_cumul[:-1]
+        idx_end = idx_cumul
+        bb_per_folder = [bb_all[start:end] for start, end in zip(idx_start, idx_end)] 
+        return bb_per_folder # [E,8,3]
 
 
 
@@ -90,10 +84,10 @@ class Loss_Graphic:
     def __init__(self, exp_folder):
         self.exp_folder = exp_folder
 
-    def plot_losses(self, train_loss, test_loss):
+    def plot_losses(self, train_loss_epochs, test_loss_epochs):
         fig, ax = plt.subplots()
-        ax.plot(train_loss, label='train_loss', color='black')
-        ax.plot(test_loss, label='test_loss', color='red')
+        ax.plot(train_loss_epochs, label='train_loss', color='black')
+        ax.plot(test_loss_epochs, label='test_loss', color='red')
         ax.set_xlabel('epoch')
         ax.set_ylabel('loss')
         ax.set_ylim(0,0.01)

@@ -38,8 +38,8 @@ def test_plot(visualize=False):
 
 
     if visualize:
-        graphic._plot('test',[box1,box2], [box1,box2],rgb)
+        graphic._plot_one_folder('test',[box1,box2], [box1,box2],rgb)
     else:
         with patch('matplotlib.pyplot.show') as mock_show:
-            graphic._plot('test', [box1,box2], [box1,box2],rgb)
+            graphic._plot_one_folder('test', [box1,box2], [box1,box2],rgb)
     assert mock_show.called
