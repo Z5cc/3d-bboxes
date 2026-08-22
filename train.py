@@ -30,7 +30,7 @@ def train(exp_folder):
     train_data = Dataset_dl_challenge(TRAIN_PATH)
     val_data = Dataset_dl_challenge(VAL_PATH)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
-    val_loader = DataLoader(val_data, num_workers=NUM_WORKERS)
+    val_loader = DataLoader(val_data, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     train_loss_epochs, val_loss_epochs, val_RMSE_epochs = [], [], []
 
     for epoch in range(EPOCHS):
@@ -59,7 +59,8 @@ def train(exp_folder):
         val_loss_epochs.append(val_loss)
         train_loss_epochs.append(train_loss)
         graphic.plot_losses(train_loss_epochs,val_loss_epochs)
-        print(f'EPOCH: {epoch}. computing time: {(time.time()-start):.2f}s.')
+        current_lr = optimizer.param_groups[0]["lr"]
+        print(f'EPOCH: {epoch}. computing time: {(time.time()-start):.2f}s. train_loss: {train_loss:.6f}. val_loss: {val_loss:.6f}. lr: {current_lr:.6f}.')
         scheduler.step(val_loss)
 
 

@@ -2,45 +2,106 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from Constants import K
+
+
+
+
+class ResidualUnit(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False) # every conv layer is followed by BN, and BN already learns a 'bias', so not another 'bias' needed
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)
+        # if stride>1: also the channels of the skip connections have to be reduced by 1x1 convolution with same stride.       resnet downsamples with stride=2. VGG used max_pooling.
+        if stride>1:
+            self.skip_connection = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False) 
+        else:
+            self.skip_connection = nn.Identity()
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out =        self.bn2(self.conv2(out))
+        x = self.skip_connection(x)
+        out += x
+        return F.relu(out)
+
+
+# class ResModel(nn.Model):
+    # def __init__(self):
+    #     super().__init__()
+    #     self.res1 = ResidualUnit()
+    #     self.res2 = ResidualUnit()
+    #     self.res3 = ResidualUnit()
+    #     self.pool = nn.MaxPool2d(2, stride=2)
+    
+
+
+
+
+
 
 class Model(nn.Module):
-    def __init__(self):
+
+    def __init__(self, k=K):
         super().__init__()
-        self.pool1 = nn.MaxPool2d((2,2),stride=(2,2))
-        self.pool2 = nn.MaxPool2d((2,2),stride=(2,2))
-        self.pool3 = nn.MaxPool2d((2,2),stride=(2,2))
-        self.pool4 = nn.MaxPool2d((2,2),stride=(2,2))
-        self.pool5 = nn.MaxPool2d((2,2),stride=(2,2))
-        self.conv1 = nn.Conv2d(4,8,(3,3),padding='same')
-        self.conv2 = nn.Conv2d(8,16,(3,3),padding='same')
-        self.conv3 = nn.Conv2d(16,32,(3,3),padding='same')
-        self.conv4 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv5 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv6 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv7 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv8 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv9 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.conv10 = nn.Conv2d(32,32,(3,3),padding='same')
-        self.lin1 = nn.Linear(8*8*32, 512)
-        self.lin2 = nn.Linear(512,128)
-        self.lin3 = nn.Linear(128,9)
+        c1 = 1*k
+        c2 = 2*k
+        c3 = 4*k
+
+        self.conv1 = nn.Conv2d(4, c1, 3, padding="same")
+        self.conv2 = nn.Conv2d(c1, c1, 3, padding="same")
+
+        self.conv3 = nn.Conv2d(c1, c2, 3, padding="same")
+        self.conv4 = nn.Conv2d(c2, c2, 3, padding="same")
+
+        self.conv5 = nn.Conv2d(c2, c3, 3, padding="same")
+        self.conv6 = nn.Conv2d(c3, c3, 3, padding="same")
+
+        self.conv7 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv8 = nn.Conv2d(c3, c3, 3, padding="same")
+
+        self.conv9 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv10 = nn.Conv2d(c3, c3, 3, padding="same")
+
+
+        self.conv11 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv12 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv13 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv14 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv15 = nn.Conv2d(c3, c3, 3, padding="same")
+
+        self.pool = nn.MaxPool2d(2, stride=2)
+
+
+        self.lin1 = nn.Linear(8 * 8 * c3, 512*40)
+        self.lin2 = nn.Linear(512*40, 128*40)
+        self.lin3 = nn.Linear(128*40, 9)
+
+
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = self.pool1(x)
+        x = self.pool(x)
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))
-        x = self.pool2(x)
+        x = self.pool(x)
         x = F.relu(self.conv5(x))
         x = F.relu(self.conv6(x))
-        x = self.pool3(x)
+        # x = F.relu(self.conv11(x))
+        x = self.pool(x)
         x = F.relu(self.conv7(x))
         x = F.relu(self.conv8(x))
-        x = self.pool4(x)
+        # x = F.relu(self.conv12(x))
+        # x = F.relu(self.conv13(x))
+        x = self.pool(x)
         x = F.relu(self.conv9(x))
         x = F.relu(self.conv10(x))
-        x = self.pool5(x)
+        # x = F.relu(self.conv14(x))
+        # x = F.relu(self.conv15(x))
+        x = self.pool(x)
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.lin1(x))
         x = F.relu(self.lin2(x))

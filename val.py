@@ -7,7 +7,7 @@ from Dataset_dl_challenge import Dataset_dl_challenge
 from Graphic import BB_Graphic
 from Model import Model
 from Criterion import RMSE
-from Constants import VAL_PATH, DEFAULT_INFERENCE_EXP, DEVICE, NUM_WORKERS
+from Constants import VAL_PATH, TEST_PATH, DEFAULT_INFERENCE_EXP, DEVICE, NUM_WORKERS
 
 
 

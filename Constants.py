@@ -3,16 +3,13 @@ from pathlib import Path
 
 
 
-N = 32
+# for deep LR = 0.0005
+# for shallow LR = 0.001
+LR = 0.0001
+N = 8
 EPOCHS =200
-LR = 0.001
-NUM_WORKERS = 1
-
-
-
-
-
-
+DEFAULT_EXP_NAME = 'exp_10layer_K40_ll_20480'
+K = 64
 
 
 # sizes of input images
@@ -20,6 +17,7 @@ H=256
 W=256
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+NUM_WORKERS = 1
 
 # dataset path
 ROOT = Path(__file__).resolve().parent
@@ -27,7 +25,7 @@ TRAIN_PATH = ROOT / 'dl_challenge_train'
 VAL_PATH = ROOT / 'dl_challenge_val'
 TEST_PATH = ROOT / 'dl_challenge_test'
 
-DEFAULT_SAVE_EXP = ROOT / 'exp_5090'
+DEFAULT_SAVE_EXP = ROOT / DEFAULT_EXP_NAME
 DEFAULT_INFERENCE_EXP = DEFAULT_SAVE_EXP
 
 
