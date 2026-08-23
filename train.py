@@ -9,7 +9,7 @@ from Graphic import Loss_Graphic
 from Model import Model
 from Criterion import MSE, MAE, RMSE
 from val import evaluate
-from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS
+from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS, DEFAULT_EXP_NAME
 
 
 
@@ -20,7 +20,7 @@ from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP,
 
 
 def train(exp_folder):
-    print(f'using device: {DEVICE}\n')
+    print(f'using device {DEVICE} for experiment {DEFAULT_EXP_NAME}\n')
     exp_folder.mkdir(parents=True, exist_ok=True)
     model = Model().to(DEVICE)
     criterion = MSE().to(DEVICE)

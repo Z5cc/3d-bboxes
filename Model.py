@@ -7,40 +7,19 @@ from Constants import K
 
 
 
-class ResidualUnit(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1):
+
+class Head(nn.Module):
+    def __init__(self, c_last_layer):
         super().__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False) # every conv layer is followed by BN, and BN already learns a 'bias', so not another 'bias' needed
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)
-        # if stride>1: also the channels of the skip connections have to be reduced by 1x1 convolution with same stride.       resnet downsamples with stride=2. VGG used max_pooling.
-        if stride>1:
-            self.skip_connection = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False) 
-        else:
-            self.skip_connection = nn.Identity()
-        self.bn1 = nn.BatchNorm2d(out_channels)
-        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.lin1 = nn.Linear(8 * 8 * c_last_layer, 32 * c_last_layer)
+        self.lin2 = nn.Linear(32 * c_last_layer, 8 * c_last_layer)
+        self.lin3 = nn.Linear(8 * c_last_layer, 3)
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1(x)))
-        out =        self.bn2(self.conv2(out))
-        x = self.skip_connection(x)
-        out += x
-        return F.relu(out)
-
-
-# class ResModel(nn.Model):
-    # def __init__(self):
-    #     super().__init__()
-    #     self.res1 = ResidualUnit()
-    #     self.res2 = ResidualUnit()
-    #     self.res3 = ResidualUnit()
-    #     self.pool = nn.MaxPool2d(2, stride=2)
-    
-
-
-
-
-
+        x = F.relu(self.lin1(x))
+        x = F.relu(self.lin2(x))
+        x = self.lin3(x)
+        return x
 
 class Model(nn.Module):
 
@@ -65,20 +44,11 @@ class Model(nn.Module):
         self.conv9 = nn.Conv2d(c3, c3, 3, padding="same")
         self.conv10 = nn.Conv2d(c3, c3, 3, padding="same")
 
-
-        self.conv11 = nn.Conv2d(c3, c3, 3, padding="same")
-        self.conv12 = nn.Conv2d(c3, c3, 3, padding="same")
-        self.conv13 = nn.Conv2d(c3, c3, 3, padding="same")
-        self.conv14 = nn.Conv2d(c3, c3, 3, padding="same")
-        self.conv15 = nn.Conv2d(c3, c3, 3, padding="same")
-
         self.pool = nn.MaxPool2d(2, stride=2)
 
-
-        self.lin1 = nn.Linear(8 * 8 * c3, 512*40)
-        self.lin2 = nn.Linear(512*40, 128*40)
-        self.lin3 = nn.Linear(128*40, 9)
-
+        self.head_shift = Head(c3)
+        self.head_scale = Head(c3)
+        self.head_rotate = Head(c3)
 
 
     def forward(self, x):
@@ -90,24 +60,25 @@ class Model(nn.Module):
         x = self.pool(x)
         x = F.relu(self.conv5(x))
         x = F.relu(self.conv6(x))
-        # x = F.relu(self.conv11(x))
         x = self.pool(x)
         x = F.relu(self.conv7(x))
         x = F.relu(self.conv8(x))
-        # x = F.relu(self.conv12(x))
-        # x = F.relu(self.conv13(x))
         x = self.pool(x)
         x = F.relu(self.conv9(x))
         x = F.relu(self.conv10(x))
-        # x = F.relu(self.conv14(x))
-        # x = F.relu(self.conv15(x))
         x = self.pool(x)
+
         x = torch.flatten(x, start_dim=1)
-        x = F.relu(self.lin1(x))
-        x = F.relu(self.lin2(x))
-        x = self.lin3(x)
-        x = self.create_bb(x)
-        return x
+
+        x_shift = self.head_shift(x) # [N,3]
+        x_scale = self.head_scale(x) # [N,3]
+        x_rotate = self.head_rotate(x) # [N,3]
+        x = torch.cat([x_shift, x_scale, x_rotate],dim=1) # [N,9]
+
+        bb = self.create_bb(x) # [N,8,3]
+        return bb
+
+
 
     def create_bb(self, y): # [N,9]
         # 0. BASE OF BOUNDING BOX

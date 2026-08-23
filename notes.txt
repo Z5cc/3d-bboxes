@@ -182,3 +182,75 @@ maybe train with very few data points   and see if overfitting happens here
 
 
 stay with 10 layers and K=40. fix final linear layers first. make it constant. then fix channels. than vary a bit with depth.   then resnet
+
+
+
+
+
+4096
+
+4.4sec
+0.0015
+
+
+
+8192 decoupled fusion heads
+10.8sec
+0.00125
+
+
+4096 decoupled fusion heads
+6.8sec
+0.0014
+
+
+20480
+10.0sec
+0.0013
+
+
+-> increase neurons for decoupled and see if it can be better
+
+
+
+maybe also less cnn layers, more fully connected layers instead.
+
+
+
+best solution right now. decoupled head with 8192 with 10 layers. continue making resnet work, then fusing of features
+
+with K=64:
+with LR = 0.0001
+        c1 = 1*k
+        c2 = 2*k
+        c3 = 4*k
+
+        self.conv1 = nn.Conv2d(4, c1, 3, padding="same")
+        self.conv2 = nn.Conv2d(c1, c1, 3, padding="same")
+
+        self.conv3 = nn.Conv2d(c1, c2, 3, padding="same")
+        self.conv4 = nn.Conv2d(c2, c2, 3, padding="same")
+
+        self.conv5 = nn.Conv2d(c2, c3, 3, padding="same")
+        self.conv6 = nn.Conv2d(c3, c3, 3, padding="same")
+
+        self.conv7 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv8 = nn.Conv2d(c3, c3, 3, padding="same")
+
+        self.conv9 = nn.Conv2d(c3, c3, 3, padding="same")
+        self.conv10 = nn.Conv2d(c3, c3, 3, padding="same")
+
+
+
+        self.lin1 = nn.Linear(8 * 8 * c, 8192)
+        self.lin2 = nn.Linear(8192, 2056)
+        self.lin3 = nn.Linear(2056, 3)
+
+
+
+head....after bigger_head_towards_end try smaller head, channels, depth ... after that is fixed ....    save to github...    then do fusion  ... then shift crop for data ambiguation ... maybe then resnet will work
+
+
+head size could not improve anything
+channels could not improve anything (more channels perform a bit better but cost much more performance)
+varying depth could not improve anything

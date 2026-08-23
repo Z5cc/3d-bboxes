@@ -8,8 +8,8 @@ from pathlib import Path
 LR = 0.0001
 N = 8
 EPOCHS =200
-DEFAULT_EXP_NAME = 'exp_10layer_K40_ll_20480'
-K = 64
+DEFAULT_EXP_NAME = 'exp_'
+K = 8
 
 
 # sizes of input images
