@@ -8,7 +8,7 @@ from pathlib import Path
 LR = 0.0001
 N = 8
 EPOCHS =200
-DEFAULT_EXP_NAME = 'exp_'
+DEFAULT_EXP_NAME = 'exp_augmentation10'
 K = 8
 
 
@@ -17,7 +17,7 @@ H=256
 W=256
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-NUM_WORKERS = 1
+NUM_WORKERS = 8
 
 # dataset path
 ROOT = Path(__file__).resolve().parent

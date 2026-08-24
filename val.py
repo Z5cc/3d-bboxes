@@ -40,7 +40,7 @@ def evaluate(data_loader, model, criterion, return_bb=False): # only part used b
 
 
 def val(exp_folder, data_folder): # in case i do test.py, i load this function to test.py script and input other TEST PATH
-    val_data = Dataset_dl_challenge(data_folder)
+    val_data = Dataset_dl_challenge(data_folder, augment=False)
     data_loader = DataLoader(val_data, num_workers=NUM_WORKERS)
     model = Model().to(DEVICE)
     model.load_state_dict(torch.load(exp_folder / "model.pth", map_location=DEVICE, weights_only=True))

@@ -28,7 +28,7 @@ def train(exp_folder):
     optimizer = optim.Adam(model.parameters(),lr=LR)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=20,factor=0.7)
     train_data = Dataset_dl_challenge(TRAIN_PATH)
-    val_data = Dataset_dl_challenge(VAL_PATH)
+    val_data = Dataset_dl_challenge(VAL_PATH,augment=False)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     val_loader = DataLoader(val_data, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     train_loss_epochs, val_loss_epochs, val_RMSE_epochs = [], [], []
