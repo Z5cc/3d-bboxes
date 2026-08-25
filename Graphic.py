@@ -87,7 +87,7 @@ class Loss_Graphic:
     def plot_losses(self, train_loss_epochs, test_loss_epochs):
         fig, ax = plt.subplots()
         ax.plot(train_loss_epochs, label='train_loss', color='black')
-        ax.plot(test_loss_epochs, label='test_loss', color='red')
+        ax.plot(test_loss_epochs, label='val_loss', color='red')
         ax.set_xlabel('epoch')
         ax.set_ylabel('loss')
         ax.set_ylim(0,0.01)

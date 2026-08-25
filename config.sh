@@ -1,5 +1,5 @@
-PORT=34226
-HOST=root@192.165.134.28
+PORT=40066
+HOST=root@80.217.90.112
 
 REMOTE_ROOT=/workspace
 LOCAL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

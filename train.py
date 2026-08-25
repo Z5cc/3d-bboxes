@@ -27,7 +27,7 @@ def train(exp_folder):
     graphic = Loss_Graphic(exp_folder)
     optimizer = optim.Adam(model.parameters(),lr=LR)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=20,factor=0.7)
-    train_data = Dataset_dl_challenge(TRAIN_PATH)
+    train_data = Dataset_dl_challenge(TRAIN_PATH,prel=True,augment=False)
     val_data = Dataset_dl_challenge(VAL_PATH,augment=False)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     val_loader = DataLoader(val_data, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
