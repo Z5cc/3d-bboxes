@@ -1,21 +1,17 @@
 import os
-import time
 import bisect
-import random
 
 import numpy as np
 import torch
-
 from torch.utils.data import Dataset
+
 from Constants import H, W
 
 
 
-
-class Dataset_dl_challenge(Dataset):
-    def __init__(self, path, prel=False, augment=True):
-        self.prel = prel
-        self.augment = augment
+class BB_Dataset(Dataset):
+    def __init__(self, path, aug):
+        self.aug = aug
         self.path = path
         self.names = []     # ['983022a8-9915-11ee-9103-bbb8eae05561', '983022a9-9915-11ee-9103-bbb8eae05561', '983022aa-9915-11ee-9103-bbb8eae05561',...]
         self.idx_cumul = [] # [5, 13, 14, ....] # first name contains 5 object that is 5 masks
@@ -35,7 +31,7 @@ class Dataset_dl_challenge(Dataset):
             total+=size
             self.idx_cumul.append(total)
 
-        if self.prel==True:
+        if self.aug==False:
             self.bb_list = self.preload(self.load_bb)
             self.x_list = self.preload(self.load_x)
 
@@ -43,14 +39,13 @@ class Dataset_dl_challenge(Dataset):
         return self.idx_cumul[-1]
 
     def __getitem__(self, idx):
-        if self.prel==True:
+        if self.aug==False:
             x = self.x_list[idx]
             bb = self.bb_list[idx]
         else:
             x = self.load_x(idx)
             bb = self.load_bb(idx)
         return x, bb
-
 
 
     def preload(self, load_fn):
@@ -78,7 +73,7 @@ class Dataset_dl_challenge(Dataset):
         ch = (h_min+h_max)//2
         cw = (w_min+w_max)//2
         # augment center
-        if self.augment==True:
+        if self.aug==True:
             ch, cw = self.augmentation(ch, cw)
         # move center if center is too close to border
         h = pc.shape[1]

@@ -4,19 +4,13 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from Dataset_dl_challenge import Dataset_dl_challenge
+from BB_Dataset import BB_Dataset
 from Graphic import Loss_Graphic
 from Model import Model
 from Criterion import MSE, MAE, RMSE
 from val import evaluate
-from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS, DEFAULT_EXP_NAME
+from Constants import TRAIN_PATH, VAL_PATH, EPOCHS, N, DEVICE, DEFAULT_SAVE_EXP, LR, NUM_WORKERS, DEFAULT_EXP_NAME, AUG
 
-
-
-# def print_gradients(model):
-#     for name, param in model.named_parameters():
-#         if param.grad is not None:
-#             print(f"{name:40s} {param.grad.abs().mean():.3e}")
 
 
 def train(exp_folder):
@@ -27,8 +21,8 @@ def train(exp_folder):
     graphic = Loss_Graphic(exp_folder)
     optimizer = optim.Adam(model.parameters(),lr=LR)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,patience=20,factor=0.7)
-    train_data = Dataset_dl_challenge(TRAIN_PATH,prel=True,augment=False)
-    val_data = Dataset_dl_challenge(VAL_PATH,augment=False)
+    train_data = BB_Dataset(TRAIN_PATH,aug=AUG)
+    val_data = BB_Dataset(VAL_PATH,aug=False)
     train_loader = DataLoader(train_data, batch_size=N, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     val_loader = DataLoader(val_data, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
     train_loss_epochs, val_loss_epochs, val_RMSE_epochs = [], [], []
@@ -49,7 +43,6 @@ def train(exp_folder):
             total_loss+=loss.detach()
 
             loss.backward()
-            # print_gradients(model)
             optimizer.step()
 
         torch.save(model.state_dict(), exp_folder / 'model.pth')

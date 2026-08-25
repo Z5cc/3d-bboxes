@@ -6,8 +6,6 @@ from Constants import K
 
 
 
-
-
 class Head(nn.Module):
     def __init__(self, c_last_layer):
         super().__init__()
@@ -20,6 +18,8 @@ class Head(nn.Module):
         x = F.relu(self.lin2(x))
         x = self.lin3(x)
         return x
+
+
 
 class Model(nn.Module):
 
@@ -77,7 +77,6 @@ class Model(nn.Module):
 
         bb = self.create_bb(x) # [N,8,3]
         return bb
-
 
 
     def create_bb(self, y): # [N,9]

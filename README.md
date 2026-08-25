@@ -22,12 +22,12 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-To begin training, run *train.py*. Ensure that the *./dl_challenge_train* directory contains the necessary data samples, as they are not provided here.
+To begin training, run *train.py*. Ensure that the *./BB_Dataset_train* directory contains the necessary data samples, as they are not provided here.
 ```bash
 python3 train.py
 ```
 
-Run the *inference.py* file to perform inference and visualization. Ensure that the *./dl_challenge_test* directory contains data samples. Four sample files are provided, and they were not used during model training.
+Run the *inference.py* file to perform inference and visualization. Ensure that the *./BB_Dataset_test* directory contains data samples. Four sample files are provided, and they were not used during model training.
 ```bash
 python3 inference.py
 ```
@@ -43,7 +43,7 @@ To adjust parameters, modify the *constants.py* file.
 
 ## Methodology
 
-### Data Loader [`utils/dataset_dl_challenge.py`]
+### Data Loader [`utils/BB_Dataset.py`]
 
 When inspecting the data, I found that the order of bounding boxes in one file matches the order of masks in another file. Based on this, I chose to run one inference per object (i.e., per mask or bounding box).
 This approach has two main advantages. First, predicting a single object is easier for the model. Second, the architecture is simpler, as it does not need to handle a variable number of objects.

@@ -1,14 +1,14 @@
 import torch
 
 from Model import Model
-from Dataset_dl_challenge import Dataset_dl_challenge
+from BB_Dataset import BB_Dataset
 from val import val
 from Constants import TEST_PATH, H, W
 
 
 
 def test_inference(tmp_path):
-    dataset = Dataset_dl_challenge(TEST_PATH)
+    dataset = BB_Dataset(TEST_PATH, aug=False)
     # access first element
     x,y = dataset[0]
     model = Model()
