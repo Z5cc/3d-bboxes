@@ -3,28 +3,26 @@ from pathlib import Path
 
 
 
-# for deep LR = 0.0005
-# for shallow LR = 0.001
-LR = 0.0001
+LR = 0.0002
 N = 8
-EPOCHS =200
-DEFAULT_EXP_NAME = 'exp_'
-K = 8
+EPOCHS =300
+DEFAULT_EXP_NAME = 'exp_K32_aug'
+K = 32
+AUG = True
+
 
 
 # sizes of input images
 H=256
 W=256
-
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUM_WORKERS = 1
 
 # dataset path
 ROOT = Path(__file__).resolve().parent
-TRAIN_PATH = ROOT / 'dl_challenge_train'
-VAL_PATH = ROOT / 'dl_challenge_val'
-TEST_PATH = ROOT / 'dl_challenge_test'
-
+TRAIN_PATH = ROOT / 'BB_Dataset_train'
+VAL_PATH = ROOT / 'BB_Dataset_val'
+TEST_PATH = ROOT / 'BB_Dataset_test'
 DEFAULT_SAVE_EXP = ROOT / DEFAULT_EXP_NAME
 DEFAULT_INFERENCE_EXP = DEFAULT_SAVE_EXP
 

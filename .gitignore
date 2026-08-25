@@ -3,9 +3,9 @@
 __pycache__/
 .pytest_cache
 
-dl_challenge_train
-dl_challenge_val
-dl_challenge_test
+BB_Dataset_train
+BB_Dataset_val
+BB_Dataset_test
 weights
 exp_*
 note*

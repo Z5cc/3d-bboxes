@@ -1,18 +1,17 @@
 import os
-import time
 import bisect
 
 import numpy as np
 import torch
-
 from torch.utils.data import Dataset
+
 from Constants import H, W
 
 
 
-
-class Dataset_dl_challenge(Dataset):
-    def __init__(self, path):
+class BB_Dataset(Dataset):
+    def __init__(self, path, aug):
+        self.aug = aug
         self.path = path
         self.names = []     # ['983022a8-9915-11ee-9103-bbb8eae05561', '983022a9-9915-11ee-9103-bbb8eae05561', '983022aa-9915-11ee-9103-bbb8eae05561',...]
         self.idx_cumul = [] # [5, 13, 14, ....] # first name contains 5 object that is 5 masks
@@ -32,8 +31,21 @@ class Dataset_dl_challenge(Dataset):
             total+=size
             self.idx_cumul.append(total)
 
-        self.bb_list = self.preload(self.load_bb)
-        self.x_list = self.preload(self.load_x)
+        if self.aug==False:
+            self.bb_list = self.preload(self.load_bb)
+            self.x_list = self.preload(self.load_x)
+
+    def __len__(self):
+        return self.idx_cumul[-1]
+
+    def __getitem__(self, idx):
+        if self.aug==False:
+            x = self.x_list[idx]
+            bb = self.bb_list[idx]
+        else:
+            x = self.load_x(idx)
+            bb = self.load_bb(idx)
+        return x, bb
 
 
     def preload(self, load_fn):
@@ -60,6 +72,9 @@ class Dataset_dl_challenge(Dataset):
         h_max, w_max = coords.max(axis=0)
         ch = (h_min+h_max)//2
         cw = (w_min+w_max)//2
+        # augment center
+        if self.aug==True:
+            ch, cw = self.augmentation(ch, cw)
         # move center if center is too close to border
         h = pc.shape[1]
         w = pc.shape[2]
@@ -71,6 +86,11 @@ class Dataset_dl_challenge(Dataset):
         x = x[:,ch-H//2+1:ch+H//2+1,cw-W//2+1:cw+W//2+1]
         x = torch.from_numpy(x).float()
         return x
+
+    def augmentation(self, ch, cw, dev=10):
+        ch = ch + np.random.randint(-dev, +dev+1)
+        cw = cw + np.random.randint(-dev, +dev+1)
+        return ch, cw
 
     def idx_to_path_and_local_idx(self, idx):
         # bulk_idx is idx of folder like '911224f8-9915-11ee-9103-bbb8eae05561'
@@ -89,23 +109,6 @@ class Dataset_dl_challenge(Dataset):
         pc_path = bulk_path / 'pc.npy'
 
         return bbox3d_path, mask_path, pc_path, local_idx
-
-
-
-
-
-
-
-    def __len__(self):
-        return self.idx_cumul[-1]
-
-
-    def __getitem__(self, idx):
-        x = self.x_list[idx]
-        bb = self.bb_list[idx]
-        return x, bb
-
-    
     
     def get_names(self):
         return self.names

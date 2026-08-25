@@ -1,9 +1,8 @@
 import numpy as np
 import torch
-
 from torch.utils.data import DataLoader
 
-from Dataset_dl_challenge import Dataset_dl_challenge
+from BB_Dataset import BB_Dataset
 from Graphic import BB_Graphic
 from Model import Model
 from Criterion import RMSE
@@ -40,7 +39,7 @@ def evaluate(data_loader, model, criterion, return_bb=False): # only part used b
 
 
 def val(exp_folder, data_folder): # in case i do test.py, i load this function to test.py script and input other TEST PATH
-    val_data = Dataset_dl_challenge(data_folder)
+    val_data = BB_Dataset(data_folder, aug=False)
     data_loader = DataLoader(val_data, num_workers=NUM_WORKERS)
     model = Model().to(DEVICE)
     model.load_state_dict(torch.load(exp_folder / "model.pth", map_location=DEVICE, weights_only=True))
@@ -54,4 +53,4 @@ def val(exp_folder, data_folder): # in case i do test.py, i load this function t
 
 
 if __name__ == '__main__':
-    val(DEFAULT_INFERENCE_EXP, VAL_PATH)
+    val(DEFAULT_INFERENCE_EXP, TEST_PATH)

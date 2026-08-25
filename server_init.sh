@@ -26,7 +26,7 @@ EOF
 
 # copy dataset and python files to server
 rsync --rsh "ssh -p $PORT" --info=progress2           $LOCAL_ROOT/*.py $HOST:$REMOTE_ROOT
-rsync -r --rsh "ssh -p $PORT" --info=progress2        $LOCAL_ROOT/dl_challenge_* $HOST:$REMOTE_ROOT
+rsync -r --rsh "ssh -p $PORT" --info=progress2        $LOCAL_ROOT/BB_Dataset_* $HOST:$REMOTE_ROOT
 
 # install requirements
 rsync --rsh "ssh -p $PORT" --info=progress2           $LOCAL_ROOT/requirements.txt  $HOST:$REMOTE_ROOT

@@ -30,17 +30,20 @@ class Criterion(nn.Module):
 
 
 
-
 class MAE(Criterion):
     def compute_error(self, bb_delta):
         error = (bb_delta ** 2).sum(dim=3).sqrt() # [N,24,8]    # L2_error = root(x^2 + y^2 + z^2)                         
         return error
+
+
 
 # we want MSE = mean_squared_L2_error -> squared_L2_error = x^2 + y^2 + z^2
 class MSE(Criterion):
     def compute_error(self, bb_delta):
         error = (bb_delta ** 2).sum(dim=3) # [N,24,8]      # squared_L2_error = x^2 + y^2 + z^2
         return error
+
+
 
 class RMSE(MSE):
     def finalize(self, error):

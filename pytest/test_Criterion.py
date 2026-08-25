@@ -1,4 +1,5 @@
 import torch
+
 from Criterion import MSE
 from Model import Model
 
