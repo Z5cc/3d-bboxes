@@ -43,7 +43,7 @@ class BB_Graphic:
         loc='lower right')
 
         self.plot_rgb(ax1,rgb)
-        ax2.view_init(vertical_axis='z',elev=-20,azim=100,roll=180) # elev=200.   only adjust azim now
+        ax2.view_init(vertical_axis='z',elev=-70,azim=100,roll=180) # elev=200.   only adjust azim now
         plt.show()
         plt.close(fig)
 
